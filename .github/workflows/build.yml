@@ -22,6 +22,7 @@ jobs:
           KS: ${{ secrets.KEYSTORE_BASE64 }}
         run: if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$GITHUB_WORKSPACE/release.keystore"; fi
       - name: Build
+        shell: bash
         env:
           KS_PASS: ${{ secrets.KS_PASS }}
           KEY_PASS: ${{ secrets.KEY_PASS }}
@@ -31,8 +32,12 @@ jobs:
           RUN: ${{ github.run_number }}
         run: |
           V="${TAG#v}"; [ -z "$V" ] && V="1.0"
-          gradle assembleRelease bundleRelease -PversionName="$V" -PversionCode=$((100 + RUN))
-          cp app/build/outputs/apk/release/app-release.apk JobHunt_byRRK-v$V.apk
+          gradle assembleRelease bundleRelease --console=plain -PversionName="$V" -PversionCode=$((100 + RUN)) 2>&1 | tee build.log
+          cp app/build/outputs/apk/release/app-release.apk "JobHunt_byRRK-v$V.apk"
+      - name: Show the error (if any)
+        if: failure()
+        run: |
+          { echo '### Build error'; echo '```'; grep -B2 -A14 -E "FAILURE:|What went wrong|error:|Error:" build.log | head -70; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
           name: JobHunt_byRRK
