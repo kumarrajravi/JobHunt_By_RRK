@@ -66,10 +66,10 @@ function req(url,method,body,h){return new Promise((ok,no)=>{const bad=(c,t)=>no
  if(NATIVE){const id=Math.random().toString(36).slice(2);P[id]=(c,t)=>c>=200&&c<300?ok(t):bad(c,t);Android.http(id,url,method,JSON.stringify(h||{}),body||"")}
  else fetch(url,{method,headers:{"Content-Type":"application/json",...(h||{})},body:body||undefined}).then(async r=>{const t=await r.text();r.ok?ok(t):bad(r.status,t)}).catch(no)})}
 // ---------- AI ----------
-async function ai(system,user){const k=cfg("aikey"),p=cfg("aiprov")||"openai";if(!k)throw new Error("no AI key");
- if(p==="openai"){const t=await req("https://api.openai.com/v1/chat/completions","POST",JSON.stringify({model:"gpt-4o-mini",response_format:{type:"json_object"},messages:[{role:"system",content:system},{role:"user",content:user}]}),{Authorization:"Bearer "+k});return JSON.parse(JSON.parse(t).choices[0].message.content)}
- const t=await req("https://api.anthropic.com/v1/messages","POST",JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,system:system+" Reply with JSON only.",messages:[{role:"user",content:user}]}),{"x-api-key":k,"anthropic-version":"2023-06-01"});
- const x=JSON.parse(t).content[0].text;return JSON.parse(x.slice(x.indexOf("{"),x.lastIndexOf("}")+1))}
+const aiOn=()=>(cfg("aiprov")||"free")=="free"||!!cfg("aikey");
+async function ai(system,user){const free=(cfg("aiprov")||"free")=="free",url=free?"https://text.pollinations.ai/openai":cfg("aiurl"),model=free?"mistral":cfg("aimodel"),k=cfg("aikey");if(!url)throw new Error("set the AI URL in Settings");
+ const t=await req(url,"POST",JSON.stringify({model,messages:[{role:"system",content:system+" Reply with JSON only."},{role:"user",content:user}]}),k?{Authorization:"Bearer "+k}:{});
+ const x=JSON.parse(t).choices[0].message.content;return JSON.parse(x.slice(x.indexOf("{"),x.lastIndexOf("}")+1))}
 const ENR='You help a job seeker. Given the candidate resume and job posts, return JSON {"jobs":[{"id":"<same id>","score":<0-100 fit to the resume>,"domain":"<company website domain or empty>","bullets":["what you will do","what they want","why you fit, or the gap"]}]}. Each bullet under 14 words, plain language.';
 const EML='Write a cold email from the candidate to the recruiter for this job, in this structure: first line "tldr;" then one sentence summary; blank line; "Hi <recruiter first name or Hiring Team>,"; one short paragraph saying you saw the role at the company, your years of experience and the most relevant employers; one paragraph with 3 to 4 proof points taken ONLY from the resume that match what the job description asks for (keep real numbers, never invent anything); a closing saying you would love to be part of the team, the resume is attached and you are happy to talk; then "Best," and the name. Max 170 words, plain text, no markdown. Subject format: "<Role> | <Company> | <Name>, <current title> (<years> yrs)". Return JSON {"subject":"","body":""}.';
 // ---------- resume ----------
@@ -92,13 +92,13 @@ async function scrape(){const city=[...S.locs].find(x=>!["Anywhere","Remote","De
 async function go(){S.i=0;S.note="";S.q=[];if(!cfg("apify")){S.note="Add your Apify token in Settings to search live jobs.";return}
  S.load="Starting the search...";view();
  try{S.q=await scrape();if(!S.q.length)S.note="Nothing matched. Try other roles or places.";
-  if(S.q.length&&cfg("aikey")){S.load="Matching jobs with your resume...";view();
+  if(S.q.length&&aiOn()){S.load="Matching jobs with your resume...";view();
    try{const r=await ai(ENR,"RESUME:\n"+S.rt.slice(0,2800)+"\n\nJOBS:\n"+S.q.slice(0,30).map(j=>`id:${j.id} | ${j.t} | ${j.c} | ${j.jd.slice(0,450)}`).join("\n"));
     (r.jobs||[]).forEach(a=>{const j=S.q.find(x=>x.id==String(a.id));if(j){j.sc=a.score;j.b=a.bullets;j.d=a.domain}});S.q.sort((a,b)=>(b.sc||0)-(a.sc||0))}catch(e){S.note="AI matching skipped ("+e.message+")."}}}
  catch(e){S.note="Search failed: "+e.message}S.load="";view()}
 // ---------- email ----------
 function tpl(j){const co=j.c?" at "+j.c:"";return{subject:`${j.t} | ${j.c||"Application"} | ${S.name}`,body:`tldr;\n\nI would love to be considered for the ${j.t} role${co}.\n\nHi,\n\nI came across the ${j.t} opening${co} and wanted to reach out directly. I am ${S.name} and I work in ${[...S.roles].join(" / ")} roles.\n\nMy resume is attached and I would be glad to talk whenever it suits you.\n\nBest,\n${S.name}`}}
-async function draft(j){if(!cfg("aikey")||!S.rt)return tpl(j);return await ai(EML,`CANDIDATE NAME: ${S.name}\nRESUME:\n${S.rt.slice(0,3500)}\n\nJOB: ${j.t} at ${j.c}, ${j.l}\nJOB DESCRIPTION:\n${j.jd}`)}
+async function draft(j){if(!aiOn()||!S.rt)return tpl(j);return await ai(EML,`CANDIDATE NAME: ${S.name}\nRESUME:\n${S.rt.slice(0,3500)}\n\nJOB: ${j.t} at ${j.c}, ${j.l}\nJOB DESCRIPTION:\n${j.jd}`)}
 function sendMail(j,d){NATIVE?Android.mail(j.m||"",d.subject,d.body):window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(j.m||"")+"&su="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body),"_blank")}
 // ---------- UI ----------
 function fx(k,cb){const e=document.createElement("div");e.className="fx "+k;e.textContent={rocket:"\u{1F680}",mail:"\u2709\uFE0F",tick:"\u2705"}[k];document.body.appendChild(e);setTimeout(()=>{e.remove();cb&&cb()},k=="rocket"?950:k=="mail"?750:600)}
@@ -130,7 +130,7 @@ function results(){const v=$("v"),n=S.q.length;
  <div class="card" id="cd"><div class="hd">${logo(j)}<div><h2>${esc(j.t)}</h2><div class="co">${esc(j.c||"Company not stated")}</div></div>${j.sc!=null?`<div class="sc"><b>${esc(j.sc)}</b><small>match</small></div>`:""}</div>
  <div class="tags">${tags}</div><ul class="bl">${bl}</ul>
  <div class="acts"><button class="act" id="ap"><span>\u{1F680}</span><div><b>Read posting &amp; apply</b><small>Opens the full job post</small></div></button>
- <button class="act a2" id="em"><span>\u2709\uFE0F</span><div><b>Email directly</b><small>${j.m?esc(j.m):"No address in the post, add one in Gmail"}${cfg("aikey")?" \u00b7 written for this JD":""}</small></div></button>
+ <button class="act a2" id="em"><span>\u2709\uFE0F</span><div><b>Email directly</b><small>${j.m?esc(j.m):"No address in the post, add one in Gmail"}${aiOn()?" \u00b7 written for this JD":""}</small></div></button>
  ${j.ph?`<button class="act a3" id="wa"><span>\u{1F4AC}</span><div><b>WhatsApp</b><small>+91 ${esc(j.ph)}</small></div></button>`:""}</div>
  <div class="nav"><button id="pv" ${S.i?"":"disabled"}>\u2039 Back</button><button id="sk">Skip</button><button class="ok" id="dn">I applied \u2713</button></div></div>`;
  $("ap").onclick=()=>fx("rocket",()=>NATIVE?Android.openUrl(j.u):window.open(j.u,"_blank"));
@@ -139,9 +139,10 @@ function results(){const v=$("v"),n=S.q.length;
  $("pv").onclick=()=>{S.i--;S.note="";view()};$("sk").onclick=()=>{S.i++;S.note="";view()};$("dn").onclick=()=>fx("tick",()=>{S.i++;S.note="";view();scrollTo(0,0)})}
 function settings(){$("v").innerHTML=`<h1>Settings</h1><p class="sub">Keys are saved only on this phone.</p>
  <div class="lbl">Apify token (live job search)</div><input type="password" id="ak" value="${esc(cfg("apify"))}" placeholder="apify_api_...">
- <div class="lbl">AI for matching and emails (optional)</div><select id="ap"><option value="openai"${cfg("aiprov")!="claude"?" selected":""}>ChatGPT (OpenAI key)</option><option value="claude"${cfg("aiprov")=="claude"?" selected":""}>Claude (Anthropic key)</option></select><input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="AI API key">
+ <div class="lbl">AI for matching and emails</div><select id="ap"><option value="free"${cfg("aiprov")!="custom"?" selected":""}>Free open-source AI (no key)</option><option value="custom"${cfg("aiprov")=="custom"?" selected":""}>My own (OpenAI-compatible URL)</option></select>
+ <input type="text" id="au" value="${esc(cfg("aiurl"))}" placeholder="Custom URL, e.g. https://api.groq.com/openai/v1/chat/completions"><input type="text" id="am" value="${esc(cfg("aimodel"))}" placeholder="Custom model, e.g. llama-3.3-70b-versatile"><input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="Custom API key (leave empty for free AI)">
  <button class="btn" id="sv">Save</button><button class="btn" id="cu" style="background:var(--soft);color:var(--acc);margin-top:10px">Check for updates (v${esc(VER)})</button>`;
- $("sv").onclick=()=>{cfg("apify",$("ak").value.trim());cfg("aikey",$("ik").value.trim());cfg("aiprov",$("ap").value);S.step=0;view()};$("cu").onclick=()=>chk(true)}
+ $("sv").onclick=()=>{cfg("apify",$("ak").value.trim());cfg("aikey",$("ik").value.trim());cfg("aiurl",$("au").value.trim());cfg("aimodel",$("am").value.trim());cfg("aiprov",$("ap").value);S.step=0;view()};$("cu").onclick=()=>chk(true)}
 $("gear").onclick=()=>{S.step=S.step==="set"?0:"set";view()};
 window.__back=()=>{if(S.step==="set"){S.step=0;view();return true}if(S.step==3&&!S.load){if(S.i>0){S.i--;view();return true}S.step=2;view();return true}if(S.step>0&&S.step<3){S.step--;view();return true}return false};
 // ---------- updater ----------
