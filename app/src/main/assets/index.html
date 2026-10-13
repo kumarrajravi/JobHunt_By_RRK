@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5c4d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>Jobflow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#faf8f5;--card:#fff;--ink:#17201e;--mut:#6b7774;--line:#e6e2da;--acc:#0f5c4d;--accfg:#fff;--soft:#e8f1ee;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1514;--card:#17201e;--ink:#eef3f1;--mut:#97a5a1;--line:#27332f;--acc:#4fc4ad;--accfg:#06201b;--soft:#1d2b27}}
+:root[data-theme="dark"]{--bg:#0f1514;--card:#17201e;--ink:#eef3f1;--mut:#97a5a1;--line:#27332f;--acc:#4fc4ad;--accfg:#06201b;--soft:#1d2b27}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Inter","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;min-height:100vh}
+main{max-width:460px;margin:0 auto;padding:28px 22px 60px}
+.logo{font-weight:700;letter-spacing:-.02em;font-size:1.05rem;color:var(--acc)}
+.dots{display:flex;gap:6px;margin:18px 0 34px}
+.dots i{height:4px;flex:1;border-radius:4px;background:var(--line)}.dots i.on{background:var(--acc)}
+h1{font-size:1.9rem;line-height:1.15;letter-spacing:-.03em;margin:0 0 8px;font-weight:700}
+p.sub{color:var(--mut);margin:0 0 26px}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:20px;padding:34px 18px;text-align:center;color:var(--mut);background:var(--card);cursor:pointer}
+.drop b{display:block;color:var(--ink);margin-bottom:4px}.drop.has{border-style:solid;border-color:var(--acc);color:var(--acc)}
+input[type=file]{display:none}
+input[type=text],input[type=number]{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-top:14px}
+input:focus,button:focus-visible,a:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px;border-radius:99px;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.lbl{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:26px 0 10px}
+.btn{display:block;width:100%;text-align:center;text-decoration:none;font:inherit;font-weight:600;background:var(--acc);color:var(--accfg);border:0;border-radius:16px;padding:15px;margin-top:30px;cursor:pointer}
+.btn.alt{background:var(--soft);color:var(--acc);margin-top:10px}.btn.sm{padding:12px;margin-top:0}
+.btn:disabled{opacity:.4;cursor:default}
+.back{background:none;border:0;color:var(--mut);font:inherit;margin-top:16px;cursor:pointer;padding:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:24px;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.tag{display:inline-block;font-size:.74rem;background:var(--soft);color:var(--acc);padding:3px 10px;border-radius:99px;margin-bottom:12px}
+.card h2{font-size:1.35rem;letter-spacing:-.02em;margin:0 0 2px;line-height:1.25}
+.meta{color:var(--mut);font-size:.92rem;margin-bottom:18px}
+.plan{counter-reset:s;list-style:none;padding:0;margin:0}
+.plan li{counter-increment:s;display:grid;grid-template-columns:28px 1fr;gap:4px 10px;padding:12px 0;border-top:1px solid var(--line)}
+.plan li:before{content:counter(s);width:24px;height:24px;border-radius:50%;background:var(--soft);color:var(--acc);font-size:.8rem;display:grid;place-items:center;font-weight:600}
+.plan li div{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.plan small{color:var(--mut);display:block;width:100%}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.prog{color:var(--mut);font-size:.88rem;margin:0 2px 12px;display:flex;justify-content:space-between}
+.adv{margin-top:34px;text-align:center}.adv button{background:none;border:0;color:var(--mut);font:inherit;font-size:.85rem;cursor:pointer;text-decoration:underline}
+.ex{font-size:.88rem;color:var(--mut);margin:0 0 16px;white-space:pre-line}
+</style>
+</head>
+<body>
+<main>
+<div class="logo" style="display:flex;justify-content:space-between"><span>jobflow</span><button class="back" id="gear" style="margin:0;padding:0">Settings</button></div>
+<div class="dots" id="dots"></div>
+<div id="v"></div>
+</main>
+<script>
+const JOBS=[
+{t:"Senior Brand Manager (3W)",c:"Greaves Electric Mobility",l:"Bengaluru",e:"6+ yrs",s:"LinkedIn",u:"4472706083"},
+{t:"Brand Manager / Sr. Brand Manager",c:"The Sleep Company",l:"Mumbai",e:"4-7 yrs",s:"LinkedIn",u:"4464183419"},
+{t:"Category Manager - D2C",c:"Michael Page client",l:"India",e:"4-7 yrs",s:"Michael Page",u:"https://www.michaelpage.co.in/job-detail/category-manager-5-years-d2c/ref/jn-082026-7084310"},
+{t:"Brand Manager - Ostocalcium",c:"Haleon",l:"Gurgaon",e:"4+ yrs",s:"LinkedIn",u:"4467551248"},
+{t:"Brand Manager",c:"Opella",l:"Mumbai",e:"5-7 yrs",s:"LinkedIn",u:"4475396902"},
+{t:"Brand Manager",c:"Ace Blend",l:"Mumbai",e:"4-6+ yrs",s:"LinkedIn",u:"4473467930",m:"hr@aceblend.com"},
+{t:"Brand Manager - Derma",c:"Premium beauty retailer",l:"Mumbai",e:"7-12 yrs",p:"Up to 40 LPA",s:"LinkedIn",u:"4469665769",m:"deepika.swami@unisoninternational.net",ph:"9829110634"},
+{t:"Senior Brand Manager",c:"Allied Blenders & Distillers",l:"Mumbai",e:"8-12 yrs",s:"LinkedIn",u:"4476151671",m:"careers@abdindia.com"},
+{t:"Senior Brand Manager",c:"Dot & Key",l:"Kolkata",e:"",s:"LinkedIn",u:"4467852888"},
+{t:"Category Marketing Manager",c:"Jubilant FoodWorks",l:"Noida",e:"",s:"LinkedIn",u:"4473615457"},
+{t:"Senior Manager - Category Management",c:"Zepto",l:"Bengaluru",e:"3-7 yrs",s:"LinkedIn",u:"4467687642"},
+{t:"Brand Manager",c:"Traya",l:"Mumbai",e:"3+ yrs",s:"LinkedIn",u:"4462229323"}];
+const ROLES=["Brand Manager","Category Manager","Growth Manager","Marketing Manager"];
+const LOCS=["Bengaluru","Mumbai","Delhi NCR","Hyderabad","Pune","Chennai","Kolkata","Remote","Anywhere"];
+const AL={"Bengaluru":["bengaluru","bangalore"],"Delhi NCR":["delhi","noida","gurgaon","gurugram"],"Remote":["remote"],"Anywhere":[""]};
+const S={step:0,name:"",file:null,roles:new Set(["Brand Manager"]),locs:new Set(),pay:"",q:[],i:0,adv:false,loading:false,note:""};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function chips(list,set,key){return '<div class="chips">'+list.map(x=>`<button class="chip${set.has(x)?" on":""}" data-k="${key}" data-v="${esc(x)}">${esc(x)}</button>`).join("")+"</div>"}
+function view(){
+ if(S.step==="set"){settings();return}
+ $("dots").innerHTML=[0,1,2,3].map(n=>`<i class="${n<=S.step?"on":""}"></i>`).join("");
+ const v=$("v");
+ if(S.step==0){v.innerHTML=`<h1>Start with your resume.</h1><p class="sub">It stays on your phone. We use it to write your emails.</p>
+ <label class="drop${S.file?" has":""}"><input type="file" id="f" accept=".pdf,.doc,.docx"><b>${S.file?esc(S.file.name):"Choose your resume"}</b>${S.file?"Tap to change":"PDF or Word"}</label>
+ <input type="text" id="nm" placeholder="Your name" value="${esc(S.name)}">
+ <button class="btn" id="nx" ${S.file&&S.name?"":"disabled"}>Continue</button>`;
+  $("f").onchange=e=>{S.file=e.target.files[0]||null;view()};$("nm").oninput=e=>{S.name=e.target.value;$("nx").disabled=!(S.file&&S.name.trim())};
+ }
+ if(S.step==1){v.innerHTML=`<h1>Which roles?</h1><p class="sub">Pick all that fit, or add your own.</p>${chips([...new Set([...ROLES,...S.roles])],S.roles,"roles")}
+ <input type="text" id="cr" placeholder="Add another role, press Enter"><button class="btn" id="nx" ${S.roles.size?"":"disabled"}>Continue</button><button class="back" id="bk">Back</button>`;
+  $("cr").onkeydown=e=>{if(e.key=="Enter"&&e.target.value.trim()){S.roles.add(e.target.value.trim());view()}};
+ }
+ if(S.step==2){v.innerHTML=`<h1>Where, and how much?</h1><p class="sub">Location helps. Pay is optional.</p>${chips(LOCS,S.locs,"locs")}
+ <div class="lbl">Minimum pay, LPA (optional)</div><input type="number" id="pay" inputmode="numeric" placeholder="e.g. 25" value="${esc(S.pay)}">
+ <button class="btn" id="nx">Find my jobs</button><button class="back" id="bk">Back</button>`;
+  $("pay").oninput=e=>S.pay=e.target.value;
+ }
+ if(S.step==3)S.loading?loadingV():results();
+ document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const s=S[b.dataset.k],x=b.dataset.v;s.has(x)?s.delete(x):s.add(x);view()});
+ if($("nx"))$("nx").onclick=()=>{S.step++;if(S.step==3)go();view();scrollTo(0,0)};
+ if($("bk"))$("bk").onclick=()=>{S.step--;view()};
+}
+function kw(){return[...S.roles].map(r=>r.toLowerCase().split(" ")[0])}
+function locOk(l){if(!S.locs.size||S.locs.has("Anywhere"))return true;l=l.toLowerCase();if(l=="india")return true;return[...S.locs].some(x=>(AL[x]||[x.toLowerCase()]).some(a=>l.includes(a)))}
+const demo=()=>JOBS.filter(j=>roleOk(j)&&locOk(j.l)).map(j=>({...j,u:/^\d+$/.test(j.u)?"https://www.linkedin.com/jobs/view/"+j.u:j.u}));
+const roleOk=j=>kw().some(k=>j.t.toLowerCase().includes(k));
+const NATIVE=typeof Android!=="undefined",P={};window.__cb=(id,c,t)=>{P[id]&&P[id](c,t);delete P[id]};
+function req(url,method,body){return new Promise((ok,no)=>{if(NATIVE){const id=Math.random().toString(36).slice(2);P[id]=(c,t)=>c>=200&&c<300?ok(t):no(new Error("HTTP "+c+" "+t.slice(0,140)));Android.http(id,url,method,body||"")}else fetch(url,{method,headers:{"Content-Type":"application/json"},body}).then(async r=>{const t=await r.text();r.ok?ok(t):no(new Error("HTTP "+r.status+" "+t.slice(0,140)))}).catch(no)})}
+const tok=()=>{try{return localStorage.getItem("apify")||""}catch(e){return""}};
+function mapJob(j){const d=j.descriptionText||"",em=(d.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/)||[""])[0],ph=(d.match(/(?:\+?91[\s-]?)?([6-9]\d{4}[\s-]?\d{5})/)||[])[1],ex=(d.match(/(\d+\s*[-\u2013to]+\s*\d+\+?|\d+\+)\s*(?:years|yrs)/i)||[""])[0];
+ return{id:j.id,t:j.title||"",c:j.companyName||"",l:j.location||"",e:ex,p:j.salary||"",s:"LinkedIn",u:j.link||(j.id?"https://www.linkedin.com/jobs/view/"+j.id:""),m:em,ph:ph?ph.replace(/\D/g,""):"",x:d.replace(/\s+/g," ").slice(0,220)}}
+async function scrape(){const city=[...S.locs].find(x=>!["Anywhere","Remote","Delhi NCR"].includes(x)),loc=S.locs.has("Delhi NCR")&&!city?"Delhi, India":city?city+", India":"India",seen=new Set(),out=[];
+ for(const r of [...S.roles].slice(0,3)){const t=await req("https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/run-sync-get-dataset-items?timeout=240&token="+encodeURIComponent(tok()),"POST",JSON.stringify({keywords:r,location:loc,datePosted:"pastMonth",limitPerSource:15,scrapeCompany:false}));
+  JSON.parse(t).forEach(j=>{const m=mapJob(j);if(m.id&&!seen.has(m.id)&&m.u){seen.add(m.id);out.push(m)}})}
+ return out.filter(roleOk)}
+async function go(){S.i=0;S.note="";if(!tok()){S.q=demo();S.note="Sample jobs. Add your Apify token in Settings to search live.";return}
+ S.loading=true;S.q=[];view();try{S.q=await scrape();if(!S.q.length)S.note="Nothing new matched. Try other roles or places."}catch(e){S.q=demo();S.note="Live search failed ("+e.message+"). Showing sample jobs."}S.loading=false;view()}
+function loadingV(){$("v").innerHTML=`<h1>Searching the web for you.</h1><p class="sub">Apify is reading fresh listings for ${esc([...S.roles].join(", "))}. This takes about a minute.</p><div class="card"><span class="tag">Working</span><p class="meta">Keep the app open.</p></div>`}
+function settings(){$("dots").innerHTML="";$("v").innerHTML=`<h1>Settings</h1><p class="sub">Paste your Apify API token to search live. It is saved only on this device.</p><input type="text" id="tk" placeholder="apify_api_..." value="${esc(tok())}"><button class="btn" id="sv">Save</button><button class="back" id="bk">Back</button>`;
+ $("sv").onclick=()=>{try{localStorage.setItem("apify",$("tk").value.trim())}catch(e){}S.step=0;view()};$("bk").onclick=()=>{S.step=0;view()}}
+$("gear").onclick=()=>{S.step="set";view()};
+function mail(j){
+ const co=j.c?" at "+j.c:"",sub=`${j.t}${j.c?" | "+j.c:""} | ${S.name}`;
+ const body=`Hi,\n\nI came across the ${j.t} opening${co} and wanted to reach out directly. I am ${S.name}, looking for ${[...S.roles].join(" / ")} roles.\n\nMy resume is attached and I would love to talk whenever it suits you.\n\nBest,\n${S.name}`;
+ return`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(j.m||"")}&su=${encodeURIComponent(sub)}&body=${encodeURIComponent(body)}`}
+function wa(j){return`https://wa.me/91${j.ph}?text=${encodeURIComponent(`Hi, I saw the ${j.t} opening${j.c?" at "+j.c:""}. I am ${S.name}. Is the role still open? Happy to share my resume.`)}`}
+function results(){
+ const v=$("v"),n=S.q.length;
+ if(!n||S.i>=n){v.innerHTML=`<h1>${n?"That is all for now.":"No match yet."}</h1><p class="sub">${n?"You went through every job. Come back tomorrow for fresh ones.":(S.note||"Try more roles or locations.")}</p>
+ <div class="adv"><button id="ad">Add job group chats (WhatsApp / Telegram)</button></div>${S.adv?advHtml():""}<button class="back" id="bk">Change my search</button>`;
+  if($("ad"))$("ad").onclick=()=>{S.adv=true;view()};bind();return}
+ const j=S.q[S.i],steps=[];
+ steps.push(`<li><div><a class="btn alt sm" href="${esc(j.u)}" target="_blank" rel="noopener">Read the posting</a><small>Check the role and requirements.</small></div></li>`);
+ steps.push(`<li><div><a class="btn sm" href="${esc(mail(j))}" target="_blank" rel="noopener">${j.m?"Email in Gmail":"Draft email"}</a><small>${j.m?esc(j.m)+". ":"No address in the post, add one in Gmail. "}Attach ${esc(S.file.name)}.</small></div></li>`);
+ if(j.ph)steps.push(`<li><div><a class="btn alt sm" href="${esc(wa(j))}" target="_blank" rel="noopener">Message on WhatsApp</a><small>Short note, already written.</small></div></li>`);
+ v.innerHTML=`${S.note?`<p class="ex">${esc(S.note)}</p>`:""}<div class="prog"><span>Job ${S.i+1} of ${n}</span><span>${esc(j.s)}</span></div><div class="card"><span class="tag">${esc(j.e||"Experience not stated")}</span>
+ <h2>${esc(j.t)}</h2><div class="meta">${esc(j.c||"Company not stated")}${j.l?" · "+esc(j.l):""}${j.p?" · "+esc(j.p):""}</div>
+ ${j.x?`<p class="ex">${esc(j.x)}</p>`:""}<ol class="plan">${steps.join("")}</ol>
+ <div class="row2"><button class="btn alt sm" id="sk">Skip</button><button class="btn sm" id="dn">I applied</button></div></div>
+ <div class="adv"><button id="ad">Add job group chats</button></div>${S.adv?advHtml():""}`;
+ $("sk").onclick=()=>{S.i++;view()};$("dn").onclick=()=>{S.i++;view();scrollTo(0,0)};if($("ad"))$("ad").onclick=()=>{S.adv=true;view()};bind();
+}
+function advHtml(){return`<div class="card" style="margin-top:20px"><h2 style="font-size:1.05rem">Upload a group chat</h2><p class="meta">WhatsApp export (.zip or .txt) or Telegram result.json. We keep only posts that match your roles.</p><label class="drop"><input type="file" id="cf" accept=".zip,.txt,.json"><b>Choose chat file</b>Processed on your phone</label></div>`}
+function bind(){if($("cf"))$("cf").onchange=async e=>{const f=e.target.files[0];if(!f)return;let t="";
+ if(f.name.endsWith(".zip")){const z=await JSZip.loadAsync(f);const fl=Object.values(z.files).find(x=>/\.(txt|json)$/.test(x.name));t=fl?await fl.async("string"):""}else t=await f.text();
+ const add=parse(t);S.q.push(...add);S.adv=false;alert(add.length+" matching posts added to your list.");view()};
+ if($("bk"))$("bk").onclick=()=>{S.step=1;view()}}
+function parse(t){let ms=[];try{const d=JSON.parse(t);ms=(d.messages||[]).map(m=>Array.isArray(m.text)?m.text.map(x=>x.text||x).join(""):m.text||"")}catch(e){ms=t.split(/\n(?=\u200e?\[?\d{1,2}\/\d{1,2}\/\d{2,4},? )/).map(x=>x.replace(/^[^:]*?\] [^:]+: |^[^-]*- [^:]+: /,""))}
+ const K=kw(),out=[],seen=new Set();
+ ms.forEach(m=>{if(m.length<80||!/hiring|opening|vacanc|looking for|apply|\bJD\b/i.test(m)||!K.some(k=>m.toLowerCase().includes(k)))return;
+  const key=m.slice(0,80).toLowerCase();if(seen.has(key))return;seen.add(key);
+  const em=(m.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/)||[""])[0],ph=(m.match(/(?:\+?91[\s-]?)?([6-9]\d{4}[\s-]?\d{5})/)||[])[1],u=(m.match(/https?:\/\/\S+/)||[""])[0];
+  const ln=m.split("\n").find(x=>x.trim().length>12)||m;
+  out.push({t:ln.replace(/[*_#>]/g,"").slice(0,80),c:"",l:"",e:"",s:"Your chat",u:u||"https://www.google.com/search?q="+encodeURIComponent(ln.slice(0,60)),m:em,ph:ph?ph.replace(/\D/g,""):"",x:m.slice(0,220)})});
+ return out}
+view();
+</script>
+</body>
+</html>
