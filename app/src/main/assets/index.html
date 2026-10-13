@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f5c4d">
+<title>JobHunt_byRRK</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+:root{--bg:#faf8f5;--card:#fff;--ink:#17201e;--mut:#6b7774;--line:#e6e2da;--acc:#0f5c4d;--accfg:#fff;--soft:#e8f1ee;--warm:#fff3e0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1514;--card:#17201e;--ink:#eef3f1;--mut:#97a5a1;--line:#27332f;--acc:#4fc4ad;--accfg:#06201b;--soft:#1d2b27;--warm:#33281a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Roboto,sans-serif;min-height:100vh}
+main{max-width:480px;margin:0 auto;padding:22px 20px 60px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800;letter-spacing:-.02em;color:var(--acc);font-size:1.05rem}.logo small{color:var(--mut);font-weight:500;margin-left:6px}
+.txt{background:none;border:0;color:var(--mut);font:inherit;cursor:pointer;padding:6px 0}
+.dots{display:flex;gap:6px;margin:16px 0 28px}.dots i{height:4px;flex:1;border-radius:4px;background:var(--line)}.dots i.on{background:var(--acc)}
+h1{font-size:1.85rem;line-height:1.15;letter-spacing:-.03em;margin:0 0 8px}p.sub{color:var(--mut);margin:0 0 24px}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:20px;padding:30px 18px;text-align:center;color:var(--mut);background:var(--card);cursor:pointer}
+.drop b{display:block;color:var(--ink)}.drop.has{border-style:solid;border-color:var(--acc);color:var(--acc)}input[type=file]{display:none}
+input[type=text],input[type=number],input[type=password],select{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-top:12px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:10px 16px;border-radius:99px;cursor:pointer}.chip.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.lbl{font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:24px 0 8px}
+.btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;background:var(--acc);color:var(--accfg);border:0;border-radius:16px;padding:15px;margin-top:26px;cursor:pointer}.btn:disabled{opacity:.4}
+.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:20px;animation:in .4s ease;box-shadow:0 8px 30px rgba(15,92,77,.08)}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.hd{display:flex;gap:14px;align-items:center}.hd h2{font-size:1.15rem;line-height:1.25;margin:0;letter-spacing:-.01em}.co{color:var(--mut);font-size:.92rem}
+.lg{position:relative;flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:800;overflow:hidden}.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:8px;display:none}.lg.ok img{display:block}
+.sc{margin-left:auto;text-align:center;background:var(--soft);color:var(--acc);border-radius:14px;padding:6px 10px}.sc b{display:block;font-size:1.1rem;line-height:1}.sc small{font-size:.65rem}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:16px 0 4px}.tag{font-size:.78rem;background:var(--soft);color:var(--acc);padding:4px 11px;border-radius:99px}.tag.w{background:var(--warm);color:#b26a00}
+.bl{margin:12px 0 4px;padding:0;list-style:none}.bl li{display:flex;gap:10px;padding:7px 0;font-size:.93rem}.bl li:before{content:"•";color:var(--acc);font-weight:900}
+.acts{display:grid;gap:10px;margin-top:16px}
+.act{display:flex;align-items:center;gap:14px;text-align:left;border:0;border-radius:18px;padding:14px 16px;font:inherit;cursor:pointer;color:var(--accfg);background:var(--acc);transition:transform .12s}.act:active{transform:scale(.97)}
+.act span{font-size:1.6rem}.act b{display:block;line-height:1.2}.act small{display:block;opacity:.8;font-size:.76rem}
+.act.a2{background:#1f3b8a;color:#fff}.act.a3{background:var(--soft);color:var(--acc)}.act.busy{opacity:.6;pointer-events:none}.act.busy span{animation:sp 1s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}
+.nav{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-top:14px}.nav button{font:inherit;border:1px solid var(--line);background:none;color:var(--ink);border-radius:14px;padding:11px;cursor:pointer}.nav .ok{background:var(--soft);color:var(--acc);border-color:var(--soft);font-weight:700}.nav button:disabled{opacity:.35}
+.prog{display:flex;justify-content:space-between;color:var(--mut);font-size:.86rem;margin:0 2px 10px}
+.ban{background:var(--warm);color:#8a5200;border-radius:14px;padding:12px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.9rem}.ban button{font:inherit;font-weight:700;border:0;background:#b26a00;color:#fff;border-radius:10px;padding:8px 12px}
+.note{color:var(--mut);font-size:.85rem;margin:0 0 12px}
+.fx{position:fixed;left:50%;top:50%;font-size:76px;z-index:9;pointer-events:none}
+.fx.rocket{animation:rk .95s ease-in forwards}@keyframes rk{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-50%,-62%) scale(1.35)}100%{transform:translate(55vw,-95vh) scale(.1) rotate(25deg);opacity:.3}}
+.fx.mail{animation:dp .7s cubic-bezier(.3,1.5,.5,1) forwards}@keyframes dp{0%{transform:translate(-50%,-100vh)}100%{transform:translate(-50%,-50%)}}
+.fx.tick{animation:tk .6s ease-out forwards;color:var(--acc)}@keyframes tk{0%{transform:translate(-50%,-50%) scale(0)}60%{transform:translate(-50%,-50%) scale(1.3)}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><div class="logo">JobHunt_byRRK<small id="ver"></small></div><button class="txt" id="gear">Settings</button></div>
+<div id="ban"></div><div class="dots" id="dots"></div><div id="v"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id),NATIVE=typeof Android!=="undefined",VER=NATIVE?Android.version():"1.0";
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cfg=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
+const saved=(()=>{try{return JSON.parse(cfg("jh")||"{}")}catch(e){return{}}})();
+const S={step:0,name:saved.name||"",rname:saved.rname||"",rt:saved.rt||"",roles:new Set(saved.roles||["Brand Manager"]),locs:new Set(saved.locs||[]),pay:saved.pay||"",q:[],i:0,load:"",note:"",upd:null,adv:false};
+const keep=()=>cfg("jh",JSON.stringify({name:S.name,rname:S.rname,rt:S.rt,roles:[...S.roles],locs:[...S.locs],pay:S.pay}));
+const ROLES=["Brand Manager","Category Manager","Growth Manager","Marketing Manager"],LOCS=["Bengaluru","Mumbai","Delhi NCR","Hyderabad","Pune","Chennai","Kolkata","Remote","Anywhere"];
+$("ver").textContent="v"+VER;
+// ---------- network (native bridge avoids CORS) ----------
+const P={};window.__cb=(id,c,t)=>{P[id]&&P[id](c,t);delete P[id]};window.__upd=m=>alert(m);
+function req(url,method,body,h){return new Promise((ok,no)=>{const bad=(c,t)=>no(new Error((c==401||c==403?"Check your key. ":"")+"HTTP "+c+" "+String(t).slice(0,120)));
+ if(NATIVE){const id=Math.random().toString(36).slice(2);P[id]=(c,t)=>c>=200&&c<300?ok(t):bad(c,t);Android.http(id,url,method,JSON.stringify(h||{}),body||"")}
+ else fetch(url,{method,headers:{"Content-Type":"application/json",...(h||{})},body:body||undefined}).then(async r=>{const t=await r.text();r.ok?ok(t):bad(r.status,t)}).catch(no)})}
+// ---------- AI ----------
+async function ai(system,user){const k=cfg("aikey"),p=cfg("aiprov")||"openai";if(!k)throw new Error("no AI key");
+ if(p==="openai"){const t=await req("https://api.openai.com/v1/chat/completions","POST",JSON.stringify({model:"gpt-4o-mini",response_format:{type:"json_object"},messages:[{role:"system",content:system},{role:"user",content:user}]}),{Authorization:"Bearer "+k});return JSON.parse(JSON.parse(t).choices[0].message.content)}
+ const t=await req("https://api.anthropic.com/v1/messages","POST",JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:3000,system:system+" Reply with JSON only.",messages:[{role:"user",content:user}]}),{"x-api-key":k,"anthropic-version":"2023-06-01"});
+ const x=JSON.parse(t).content[0].text;return JSON.parse(x.slice(x.indexOf("{"),x.lastIndexOf("}")+1))}
+const ENR='You help a job seeker. Given the candidate resume and job posts, return JSON {"jobs":[{"id":"<same id>","score":<0-100 fit to the resume>,"domain":"<company website domain or empty>","bullets":["what you will do","what they want","why you fit, or the gap"]}]}. Each bullet under 14 words, plain language.';
+const EML='Write a cold email from the candidate to the recruiter for this job, in this structure: first line "tldr;" then one sentence summary; blank line; "Hi <recruiter first name or Hiring Team>,"; one short paragraph saying you saw the role at the company, your years of experience and the most relevant employers; one paragraph with 3 to 4 proof points taken ONLY from the resume that match what the job description asks for (keep real numbers, never invent anything); a closing saying you would love to be part of the team, the resume is attached and you are happy to talk; then "Best," and the name. Max 170 words, plain text, no markdown. Subject format: "<Role> | <Company> | <Name>, <current title> (<years> yrs)". Return JSON {"subject":"","body":""}.';
+// ---------- resume ----------
+async function readResume(f){let t="";const n=f.name.toLowerCase();
+ try{if(n.endsWith(".txt"))t=await f.text();else if(n.endsWith(".docx")){const z=await JSZip.loadAsync(f);t=(await z.file("word/document.xml").async("string")).replace(/<\/w:p>/g,"\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&")}
+ else if(n.endsWith(".pdf")){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;for(let p=1;p<=Math.min(d.numPages,4);p++){const c=await(await d.getPage(p)).getTextContent();t+=c.items.map(x=>x.str).join(" ")+"\n"}}}catch(e){}
+ S.rt=t.trim();S.rname=f.name;
+ if(NATIVE){const r=new FileReader();r.onload=()=>Android.saveResume(f.name,String(r.result).split(",")[1]);r.readAsDataURL(f)}keep()}
+// ---------- search ----------
+const kw=()=>[...S.roles].map(r=>r.toLowerCase().split(" ")[0]);
+const AL={"Bengaluru":["bengaluru","bangalore"],"Delhi NCR":["delhi","noida","gurgaon","gurugram"],"Remote":["remote"],"Anywhere":[""]};
+const locOk=l=>{if(!S.locs.size||S.locs.has("Anywhere"))return true;l=(l||"").toLowerCase();return[...S.locs].some(x=>(AL[x]||[x.toLowerCase()]).some(a=>l.includes(a)))||l==="india"};
+function mapJob(j){const d=(j.descriptionText||"").replace(/\s+/g," "),em=(d.match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/)||[""])[0],ph=(d.match(/(?:\+?91[\s-]?)?([6-9]\d{4}[\s-]?\d{5})/)||[])[1],ex=(d.match(/(\d+\s*[-\u2013to]+\s*\d+\+?|\d+\+)\s*(?:years|yrs)/i)||[""])[0];
+ return{id:String(j.id||""),t:j.title||"",c:j.companyName||"",l:j.location||"",e:ex,p:j.salary||"",lv:j.seniorityLevel||"",pa:j.postedAt||"",u:j.link||(j.id?"https://www.linkedin.com/jobs/view/"+j.id:""),m:em,ph:ph?ph.replace(/\D/g,""):"",jd:d.slice(0,3500),lg:j.companyLogo||j.logo||""}}
+async function scrape(){const city=[...S.locs].find(x=>!["Anywhere","Remote","Delhi NCR"].includes(x)),loc=city?city+", India":S.locs.has("Delhi NCR")?"Delhi, India":"India",seen=new Set(),out=[];
+ for(const r of [...S.roles].slice(0,3)){S.load="Reading fresh listings for "+r+"...";view();
+  const t=await req("https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/run-sync-get-dataset-items?timeout=240&token="+encodeURIComponent(cfg("apify")),"POST",JSON.stringify({keywords:r,location:loc,datePosted:"pastMonth",limitPerSource:15,scrapeCompany:false}));
+  JSON.parse(t).forEach(j=>{const m=mapJob(j);if(m.id&&!seen.has(m.id)&&m.t){seen.add(m.id);out.push(m)}})}
+ return out.filter(j=>kw().some(k=>j.t.toLowerCase().includes(k))&&locOk(j.l))}
+async function go(){S.i=0;S.note="";S.q=[];if(!cfg("apify")){S.note="Add your Apify token in Settings to search live jobs.";return}
+ S.load="Starting the search...";view();
+ try{S.q=await scrape();if(!S.q.length)S.note="Nothing matched. Try other roles or places.";
+  if(S.q.length&&cfg("aikey")){S.load="Matching jobs with your resume...";view();
+   try{const r=await ai(ENR,"RESUME:\n"+S.rt.slice(0,2800)+"\n\nJOBS:\n"+S.q.slice(0,30).map(j=>`id:${j.id} | ${j.t} | ${j.c} | ${j.jd.slice(0,450)}`).join("\n"));
+    (r.jobs||[]).forEach(a=>{const j=S.q.find(x=>x.id==String(a.id));if(j){j.sc=a.score;j.b=a.bullets;j.d=a.domain}});S.q.sort((a,b)=>(b.sc||0)-(a.sc||0))}catch(e){S.note="AI matching skipped ("+e.message+")."}}}
+ catch(e){S.note="Search failed: "+e.message}S.load="";view()}
+// ---------- email ----------
+function tpl(j){const co=j.c?" at "+j.c:"";return{subject:`${j.t} | ${j.c||"Application"} | ${S.name}`,body:`tldr;\n\nI would love to be considered for the ${j.t} role${co}.\n\nHi,\n\nI came across the ${j.t} opening${co} and wanted to reach out directly. I am ${S.name} and I work in ${[...S.roles].join(" / ")} roles.\n\nMy resume is attached and I would be glad to talk whenever it suits you.\n\nBest,\n${S.name}`}}
+async function draft(j){if(!cfg("aikey")||!S.rt)return tpl(j);return await ai(EML,`CANDIDATE NAME: ${S.name}\nRESUME:\n${S.rt.slice(0,3500)}\n\nJOB: ${j.t} at ${j.c}, ${j.l}\nJOB DESCRIPTION:\n${j.jd}`)}
+function sendMail(j,d){NATIVE?Android.mail(j.m||"",d.subject,d.body):window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(j.m||"")+"&su="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body),"_blank")}
+// ---------- UI ----------
+function fx(k,cb){const e=document.createElement("div");e.className="fx "+k;e.textContent={rocket:"\u{1F680}",mail:"\u2709\uFE0F",tick:"\u2705"}[k];document.body.appendChild(e);setTimeout(()=>{e.remove();cb&&cb()},k=="rocket"?950:k=="mail"?750:600)}
+const col=s=>{let h=0;for(const c of s||"?")h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 45% 40%)`};
+function logo(j){const ini=(j.c||"?").split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase(),d=j.d||(j.c||"x").toLowerCase().replace(/[^a-z0-9]/g,"")+".com",src=j.lg||"https://www.google.com/s2/favicons?sz=128&domain="+encodeURIComponent(d);
+ return`<div class="lg" style="background:${col(j.c)}"><span>${esc(ini)}</span><img src="${esc(src)}" alt="" onload="if(this.naturalWidth>16)this.parentNode.classList.add('ok')" onerror="this.remove()"></div>`}
+function ago(s){const d=Math.floor((Date.now()-new Date(s))/864e5);return isNaN(d)?"":d<=0?"Today":d==1?"1 day ago":d+" days ago"}
+function chips(list,set,k){return'<div class="chips">'+list.map(x=>`<button class="chip${set.has(x)?" on":""}" data-k="${k}" data-v="${esc(x)}">${esc(x)}</button>`).join("")+"</div>"}
+function view(){
+ $("ban").innerHTML=S.upd?`<div class="ban"><span>Update v${esc(S.upd.v)} is ready</span><button id="ub">Update</button></div>`:"";if($("ub"))$("ub").onclick=()=>NATIVE?Android.install(S.upd.u):window.open(S.upd.u);
+ if(S.step==="set"){$("dots").innerHTML="";return settings()}
+ $("dots").innerHTML=[0,1,2,3].map(n=>`<i class="${n<=S.step?"on":""}"></i>`).join("");const v=$("v");
+ if(S.step==0){v.innerHTML=`<h1>Start with your resume.</h1><p class="sub">It stays on your phone. It is used to match jobs and write your emails.</p>
+ <label class="drop${S.rname?" has":""}"><input type="file" id="f" accept=".pdf,.docx,.txt"><b>${S.rname?esc(S.rname):"Choose your resume"}</b>${S.rname?(S.rt?"Read "+S.rt.length+" characters. Tap to change":"Saved. Could not read the text, AI emails will be generic"):"PDF, Word or text"}</label>
+ <input type="text" id="nm" placeholder="Your name" value="${esc(S.name)}"><button class="btn" id="nx" ${S.rname&&S.name?"":"disabled"}>Continue</button>`;
+  $("f").onchange=async e=>{if(e.target.files[0]){await readResume(e.target.files[0]);view()}};$("nm").oninput=e=>{S.name=e.target.value;keep();$("nx").disabled=!(S.rname&&S.name.trim())}}
+ if(S.step==1){v.innerHTML=`<h1>Which roles?</h1><p class="sub">Pick all that fit, or add your own.</p>${chips([...new Set([...ROLES,...S.roles])],S.roles,"roles")}<input type="text" id="cr" placeholder="Add another role, press Enter"><button class="btn" id="nx" ${S.roles.size?"":"disabled"}>Continue</button>`;
+  $("cr").onkeydown=e=>{if(e.key=="Enter"&&e.target.value.trim()){S.roles.add(e.target.value.trim());keep();view()}}}
+ if(S.step==2){v.innerHTML=`<h1>Where, and how much?</h1><p class="sub">Location helps. Pay is optional.</p>${chips(LOCS,S.locs,"locs")}<div class="lbl">Minimum pay, LPA (optional)</div><input type="number" id="pay" inputmode="numeric" placeholder="e.g. 25" value="${esc(S.pay)}"><button class="btn" id="nx">Find my jobs</button>`;$("pay").oninput=e=>{S.pay=e.target.value;keep()}}
+ if(S.step==3)return S.load?loading():results();
+ document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const s=S[b.dataset.k],x=b.dataset.v;s.has(x)?s.delete(x):s.add(x);keep();view()});
+ if($("nx"))$("nx").onclick=async()=>{S.step++;scrollTo(0,0);if(S.step==3)await go();view()}}
+function loading(){$("v").innerHTML=`<h1>Hunting for you.</h1><p class="sub">${esc(S.load)}</p><div class="card"><div class="hd"><div class="lg" style="background:var(--acc)"><span style="font-size:1.6rem">\u{1F680}</span></div><div><h2>This takes about a minute</h2><div class="co">Keep the app open.</div></div></div></div>`}
+function results(){const v=$("v"),n=S.q.length;
+ if(!n||S.i>=n){v.innerHTML=`<h1>${n?"That is all for now.":"No jobs yet."}</h1><p class="sub">${esc(S.note||(n?"You went through every job. Come back for fresh ones.":"Try other roles or places."))}</p>${n?'<button class="btn" id="pv">Back to the last job</button>':""}`;if($("pv"))$("pv").onclick=()=>{S.i=n-1;view()};return}
+ const j=S.q[S.i],ag=ago(j.pa),tags=[j.l,j.e&&j.e+" exp",j.p,j.lv,ag,"via LinkedIn"].filter(Boolean).map(x=>`<span class="tag${x==ag&&/Today|1 day/.test(x)?" w":""}">${esc(x)}</span>`).join("");
+ const bl=(j.b&&j.b.length?j.b:j.jd.split(/(?<=\.)\s/).slice(0,3)).filter(Boolean).map(x=>`<li>${esc(x)}</li>`).join("");
+ v.innerHTML=`${S.note?`<p class="note">${esc(S.note)}</p>`:""}<div class="prog"><span>Job ${S.i+1} of ${n}</span><span>${j.sc!=null?"Sorted by match":""}</span></div>
+ <div class="card" id="cd"><div class="hd">${logo(j)}<div><h2>${esc(j.t)}</h2><div class="co">${esc(j.c||"Company not stated")}</div></div>${j.sc!=null?`<div class="sc"><b>${esc(j.sc)}</b><small>match</small></div>`:""}</div>
+ <div class="tags">${tags}</div><ul class="bl">${bl}</ul>
+ <div class="acts"><button class="act" id="ap"><span>\u{1F680}</span><div><b>Read posting &amp; apply</b><small>Opens the full job post</small></div></button>
+ <button class="act a2" id="em"><span>\u2709\uFE0F</span><div><b>Email directly</b><small>${j.m?esc(j.m):"No address in the post, add one in Gmail"}${cfg("aikey")?" \u00b7 written for this JD":""}</small></div></button>
+ ${j.ph?`<button class="act a3" id="wa"><span>\u{1F4AC}</span><div><b>WhatsApp</b><small>+91 ${esc(j.ph)}</small></div></button>`:""}</div>
+ <div class="nav"><button id="pv" ${S.i?"":"disabled"}>\u2039 Back</button><button id="sk">Skip</button><button class="ok" id="dn">I applied \u2713</button></div></div>`;
+ $("ap").onclick=()=>fx("rocket",()=>NATIVE?Android.openUrl(j.u):window.open(j.u,"_blank"));
+ $("em").onclick=async()=>{const b=$("em");b.classList.add("busy");let d;try{d=await draft(j)}catch(e){d=tpl(j);S.note="AI draft unavailable ("+e.message+"). Used a simple template."}b.classList.remove("busy");fx("mail",()=>sendMail(j,d))};
+ if($("wa"))$("wa").onclick=()=>{const u=`https://wa.me/91${j.ph}?text=${encodeURIComponent(`Hi, I saw the ${j.t} opening${j.c?" at "+j.c:""}. I am ${S.name}. Is the role still open? Happy to share my resume.`)}`;NATIVE?Android.openUrl(u):window.open(u,"_blank")};
+ $("pv").onclick=()=>{S.i--;S.note="";view()};$("sk").onclick=()=>{S.i++;S.note="";view()};$("dn").onclick=()=>fx("tick",()=>{S.i++;S.note="";view();scrollTo(0,0)})}
+function settings(){$("v").innerHTML=`<h1>Settings</h1><p class="sub">Keys are saved only on this phone.</p>
+ <div class="lbl">Apify token (live job search)</div><input type="password" id="ak" value="${esc(cfg("apify"))}" placeholder="apify_api_...">
+ <div class="lbl">AI for matching and emails (optional)</div><select id="ap"><option value="openai"${cfg("aiprov")!="claude"?" selected":""}>ChatGPT (OpenAI key)</option><option value="claude"${cfg("aiprov")=="claude"?" selected":""}>Claude (Anthropic key)</option></select><input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="AI API key">
+ <button class="btn" id="sv">Save</button><button class="btn" id="cu" style="background:var(--soft);color:var(--acc);margin-top:10px">Check for updates (v${esc(VER)})</button>`;
+ $("sv").onclick=()=>{cfg("apify",$("ak").value.trim());cfg("aikey",$("ik").value.trim());cfg("aiprov",$("ap").value);S.step=0;view()};$("cu").onclick=()=>chk(true)}
+$("gear").onclick=()=>{S.step=S.step==="set"?0:"set";view()};
+window.__back=()=>{if(S.step==="set"){S.step=0;view();return true}if(S.step==3&&!S.load){if(S.i>0){S.i--;view();return true}S.step=2;view();return true}if(S.step>0&&S.step<3){S.step--;view();return true}return false};
+// ---------- updater ----------
+const newer=(a,b)=>{a=a.split(".").map(Number);b=b.split(".").map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return false};
+async function chk(manual){try{const r=JSON.parse(await req("https://api.github.com/repos/kumarrajravi/JobHunt_By_RRK/releases/latest","GET","",{Accept:"application/vnd.github+json"})),v=(r.tag_name||"").replace(/^v/i,""),a=(r.assets||[]).find(x=>x.name.endsWith(".apk"));
+ if(a&&newer(v,VER)){S.upd={v,u:a.browser_download_url};view()}else if(manual)alert("You have the latest version (v"+VER+").")}catch(e){if(manual)alert("Could not check for updates: "+e.message)}}
+view();chk(false);
+</script>
+</body>
+</html>
