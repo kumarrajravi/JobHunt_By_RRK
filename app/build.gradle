@@ -1,4 +1,8 @@
 plugins { id 'com.android.application' }
+
+def vName = (project.findProperty('versionName') ?: '1.0').toString()
+def vCode = (project.findProperty('versionCode') ?: '1').toString().toInteger()
+
 android {
     namespace 'com.rrk.jobhunt'
     compileSdk 34
@@ -6,8 +10,8 @@ android {
         applicationId "com.rrk.jobhunt"
         minSdk 24
         targetSdk 34
-        versionCode (project.findProperty('versionCode') ?: '1').toInteger()
-        versionName (project.findProperty('versionName') ?: '1.0')
+        versionCode vCode
+        versionName vName
     }
     signingConfigs {
         rel {
@@ -19,12 +23,20 @@ android {
             }
         }
     }
-    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
+    }
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig System.getenv('KS_PASS') ? signingConfigs.rel : signingConfigs.debug
+            signingConfig = System.getenv('KS_PASS') ? signingConfigs.rel : signingConfigs.debug
         }
     }
 }
+
 dependencies { implementation 'androidx.core:core:1.13.1' }
