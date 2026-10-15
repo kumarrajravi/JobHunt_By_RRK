@@ -114,6 +114,26 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public String deviceInfo() {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("model", Build.MODEL);
+                o.put("brand", Build.MANUFACTURER);
+                o.put("android", Build.VERSION.RELEASE);
+                o.put("lang", java.util.Locale.getDefault().toString());
+                o.put("tz", java.util.TimeZone.getDefault().getID());
+                o.put("screen", getResources().getDisplayMetrics().widthPixels + "x" + getResources().getDisplayMetrics().heightPixels);
+                return o.toString();
+            } catch (Exception e) { return "{}"; }
+        }
+
+        @JavascriptInterface
+        public void clearResume() {
+            File[] l = new File(getFilesDir(), "resume").listFiles();
+            if (l != null) for (File f : l) f.delete();
+        }
+
+        @JavascriptInterface
         public void openUrl(final String url) { runOnUiThread(() -> openLink(url)); }
 
         @JavascriptInterface
