@@ -16,6 +16,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.core.content.FileProvider;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import java.util.concurrent.TimeUnit;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,6 +33,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private ValueCallback<Uri[]> fileCb;
     private static final int FILE_REQ = 1;
+    private String pendingNid;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -64,6 +69,10 @@ public class MainActivity extends Activity {
             }
         });
         web.loadUrl("file:///android_asset/index.html");
+        pendingNid = getIntent().getStringExtra("nid");
+        if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 7);
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork("ev_notif", ExistingPeriodicWorkPolicy.KEEP,
+                new PeriodicWorkRequest.Builder(NotifyWorker.class, 15, TimeUnit.MINUTES).build());
     }
 
     private void openLink(String url) {
@@ -91,6 +100,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onNewIntent(Intent i) {
+        super.onNewIntent(i);
+        String n = i.getStringExtra("nid");
+        if (n != null) {
+            pendingNid = n;
+            web.evaluateJavascript("window.__nid&&window.__nid(" + JSONObject.quote(n) + ")", null);
+        }
+    }
+
+    @Override
     protected void onActivityResult(int rq, int rs, Intent d) {
         if (rq == FILE_REQ && fileCb != null) {
             fileCb.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(rs, d));
@@ -111,6 +130,59 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public String version() {
             try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception e) { return "1.0"; }
+        }
+
+        @JavascriptInterface
+        public void setNotif(String hook, String email, String key) {
+            getSharedPreferences("ev", 0).edit().putString("hook", hook).putString("email", email).putString("key", key).apply();
+        }
+
+        @JavascriptInterface
+        public String pendingNotif() {
+            String n = pendingNid;
+            pendingNid = null;
+            return n == null ? "" : n;
+        }
+
+        private File writeCache(String name, String b64) throws Exception {
+            File d = new File(getCacheDir(), "tailored");
+            d.mkdirs();
+            File f = new File(d, name.replaceAll("[^A-Za-z0-9._-]", "_"));
+            try (FileOutputStream o = new FileOutputStream(f)) { o.write(Base64.decode(b64, Base64.DEFAULT)); }
+            return f;
+        }
+
+        // Gmail with the tailored resume attached.
+        @JavascriptInterface
+        public void mailFile(final String to, final String subject, final String body, final String name, final String b64) {
+            runOnUiThread(() -> {
+                try {
+                    File f = writeCache(name, b64);
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.putExtra(Intent.EXTRA_EMAIL, new String[]{to});
+                    i.putExtra(Intent.EXTRA_SUBJECT, subject);
+                    i.putExtra(Intent.EXTRA_TEXT, body);
+                    i.setType(mime(name));
+                    i.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".files", f));
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    i.setPackage("com.google.android.gm");
+                    try { startActivity(i); } catch (Exception e) { i.setPackage(null); startActivity(Intent.createChooser(i, "Send email")); }
+                } catch (Exception ignored) { }
+            });
+        }
+
+        @JavascriptInterface
+        public void shareFile(final String name, final String b64) {
+            runOnUiThread(() -> {
+                try {
+                    File f = writeCache(name, b64);
+                    Intent i = new Intent(Intent.ACTION_SEND);
+                    i.setType(mime(name));
+                    i.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".files", f));
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(i, "Share resume"));
+                } catch (Exception ignored) { }
+            });
         }
 
         @JavascriptInterface
