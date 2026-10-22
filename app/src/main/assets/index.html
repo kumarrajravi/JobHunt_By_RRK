@@ -208,7 +208,7 @@ async function draft(j){const base=DB.rt?compose(j):tpl(j);S.by="Smart composer"
 const sendMail=(j,d)=>{if(NATIVE){if(j.tl&&Android.mailFile)Android.mailFile(j.m||"",d.subject,d.body,j.tl.name,j.tl.b64);else Android.mail(j.m||"",d.subject,d.body)}else window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(j.m||"")+"&su="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body),"_blank")};
 const openU=u=>NATIVE?Android.openUrl(u):window.open(u,"_blank");
 /* >>> PASTE YOUR GOOGLE WEB APP URL BETWEEN THE QUOTES OF HOOK BELOW <<< */
-const HOOK="",KEY="rrk-ev-2026";
+const HOOK="https://script.google.com/macros/s/AKfycbwd0BaqHhPmttSmsbnjGTIX-2SfWDMHwfT_TFCYFMyGtHuPvRyepF9zIpuKTaDOiYsn/exec",KEY="rrk-ev-2026";
 const DEV=(()=>{try{return NATIVE?JSON.parse(Android.deviceInfo()):{model:navigator.userAgent.slice(0,60)}}catch(e){return{}}})();
 const cap=m=>`<div class="cap">${mini(48)}<div><b class="n">Captain A7</b><p>${m}</p></div></div>`;
 const snap=()=>{const J=Object.values(DB.jobs);return{name:DB.name,phone:DB.phone,...DEV,roles:DB.roles.join("; "),locs:DB.locs.join("; "),resume:DB.rname,found:J.length,applied:J.filter(j=>["applied","int","offer","rej"].includes(j.st)).length,int:J.filter(j=>j.st=="int").length,offer:J.filter(j=>j.st=="offer").length,ai:cfg("llm")||"free",consent:DB.consent}};
