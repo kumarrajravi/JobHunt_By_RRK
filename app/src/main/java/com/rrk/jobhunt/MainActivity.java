@@ -17,6 +17,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.core.content.FileProvider;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,8 @@ public class MainActivity extends Activity {
     private ValueCallback<Uri[]> fileCb;
     private static final int FILE_REQ = 1;
     private String pendingNid;
+    private String pendingGo;
+    private String pendingUpdateUrl;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -70,9 +73,11 @@ public class MainActivity extends Activity {
         });
         web.loadUrl("file:///android_asset/index.html");
         pendingNid = getIntent().getStringExtra("nid");
+        pendingGo = getIntent().getStringExtra("go");
         if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 7);
         WorkManager.getInstance(this).enqueueUniquePeriodicWork("ev_notif", ExistingPeriodicWorkPolicy.KEEP,
                 new PeriodicWorkRequest.Builder(NotifyWorker.class, 15, TimeUnit.MINUTES).build());
+        WorkManager.getInstance(this).enqueue(new OneTimeWorkRequest.Builder(NotifyWorker.class).build());
     }
 
     private void openLink(String url) {
@@ -102,11 +107,65 @@ public class MainActivity extends Activity {
     @Override
     protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
+        String go = i.getStringExtra("go");
+        if (go != null) {
+            web.evaluateJavascript("window.__go&&window.__go(" + JSONObject.quote(go) + ")", null);
+            return;
+        }
         String n = i.getStringExtra("nid");
         if (n != null) {
             pendingNid = n;
             web.evaluateJavascript("window.__nid&&window.__nid(" + JSONObject.quote(n) + ")", null);
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (pendingUpdateUrl != null && (Build.VERSION.SDK_INT < 26 || getPackageManager().canRequestPackageInstalls())) {
+            String u = pendingUpdateUrl;
+            pendingUpdateUrl = null;
+            startInstall(u);
+        }
+    }
+
+    private void js(final String s) { runOnUiThread(() -> web.evaluateJavascript(s, null)); }
+
+    private void startInstall(final String url) {
+        new Thread(() -> {
+            try {
+                File d = new File(getCacheDir(), "upd");
+                d.mkdirs();
+                final File f = new File(d, "update.apk");
+                HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+                c.setInstanceFollowRedirects(true);
+                c.setConnectTimeout(30000);
+                c.setReadTimeout(60000);
+                int total = c.getContentLength();
+                try (InputStream in = c.getInputStream(); FileOutputStream o = new FileOutputStream(f)) {
+                    byte[] buf = new byte[16384];
+                    int n, last = -1;
+                    long got = 0;
+                    while ((n = in.read(buf)) > 0) {
+                        o.write(buf, 0, n);
+                        got += n;
+                        if (total > 0) {
+                            int pc = (int) (got * 100 / total);
+                            if (pc != last && pc % 5 == 0) { last = pc; js("window.__prog&&window.__prog('Downloading... " + pc + "%')"); }
+                        }
+                    }
+                }
+                js("window.__prog&&window.__prog('Installing...')");
+                runOnUiThread(() -> {
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setDataAndType(FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".files", f), "application/vnd.android.package-archive");
+                    i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                });
+            } catch (Exception e) {
+                js("window.__upd(" + JSONObject.quote("Update failed: " + e) + ")");
+            }
+        }).start();
     }
 
     @Override
@@ -283,39 +342,37 @@ public class MainActivity extends Activity {
             }).start();
         }
 
-        // Downloads the new APK from the GitHub release and starts the installer.
         @JavascriptInterface
         public void install(final String url) {
-            new Thread(() -> {
-                String err = "";
-                try {
-                    File d = new File(getCacheDir(), "upd");
-                    d.mkdirs();
-                    final File f = new File(d, "update.apk");
-                    HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
-                    c.setInstanceFollowRedirects(true);
-                    try (InputStream in = c.getInputStream(); FileOutputStream o = new FileOutputStream(f)) {
-                        byte[] buf = new byte[16384];
-                        int n;
-                        while ((n = in.read(buf)) > 0) o.write(buf, 0, n);
-                    }
-                    runOnUiThread(() -> {
-                        if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
-                            startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName())));
-                            web.evaluateJavascript("window.__upd('Allow installs from this app, then tap Update again.')", null);
-                            return;
-                        }
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setDataAndType(FileProvider.getUriForFile(MainActivity.this, getPackageName() + ".files", f), "application/vnd.android.package-archive");
-                        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(i);
-                    });
-                } catch (Exception e) {
-                    err = String.valueOf(e);
-                    final String m = JSONObject.quote("Update failed: " + err);
-                    runOnUiThread(() -> web.evaluateJavascript("window.__upd(" + m + ")", null));
-                }
-            }).start();
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                pendingUpdateUrl = url;
+                js("window.__prog&&window.__prog('Allow installs from this app on the next screen, then come back. The update continues by itself.')");
+                runOnUiThread(() -> startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()))));
+                return;
+            }
+            startInstall(url);
+        }
+
+        @JavascriptInterface
+        public void showNotif(String id, String title, String msg, String cta, String ct) {
+            NotifyWorker.show(MainActivity.this, id, title, msg, cta, ct);
+        }
+
+        @JavascriptInterface
+        public void testNotif() {
+            NotifyWorker.show(MainActivity.this, "test", "Houston, test transmission", "If you can read this in your notification bar, Mission Control can reach you.", "Open jobs", "jobs");
+        }
+
+        @JavascriptInterface
+        public void pollNow() {
+            WorkManager.getInstance(MainActivity.this).enqueue(new OneTimeWorkRequest.Builder(NotifyWorker.class).build());
+        }
+
+        @JavascriptInterface
+        public String pendingGo() {
+            String g = pendingGo;
+            pendingGo = null;
+            return g == null ? "" : g;
         }
     }
 }
