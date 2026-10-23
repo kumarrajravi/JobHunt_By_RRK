@@ -50,7 +50,7 @@ public class NotifyWorker extends Worker {
             for (int i = 0; i < a.length(); i++) {
                 JSONObject o = a.getJSONObject(i);
                 String id = String.valueOf(o.get("id"));
-                show(c, id, o.optString("title"), o.optString("msg"));
+                show(c, id, o.optString("title"), o.optString("msg"), o.optString("cta"), o.optString("ct"));
                 get(hook + sep + "a=delivered&k=" + enc(key) + "&email=" + enc(email) + "&id=" + enc(id));
             }
             return Result.success();
@@ -59,20 +59,28 @@ public class NotifyWorker extends Worker {
         }
     }
 
-    private void show(Context c, String id, String title, String msg) {
+    public static void show(Context c, String id, String title, String msg, String cta, String ct) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(new NotificationChannel("ev_notif", "Mission Control", NotificationManager.IMPORTANCE_DEFAULT));
+        if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(new NotificationChannel("ev_notif2", "Mission Control", NotificationManager.IMPORTANCE_HIGH));
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
         Intent i = new Intent(c, MainActivity.class);
         i.putExtra("nid", id);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pi = PendingIntent.getActivity(c, id.hashCode(), i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        nm.notify(id.hashCode(), new NotificationCompat.Builder(c, "ev_notif")
+        NotificationCompat.Builder b = new NotificationCompat.Builder(c, "ev_notif2")
                 .setSmallIcon(android.R.drawable.ic_dialog_info)
                 .setContentTitle(title)
                 .setContentText(msg)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true)
-                .setContentIntent(pi)
-                .build());
+                .setContentIntent(PendingIntent.getActivity(c, id.hashCode(), i, flags));
+        if (cta != null && !cta.isEmpty()) {
+            Intent g = new Intent(c, MainActivity.class);
+            g.putExtra("nid", id);
+            g.putExtra("go", (ct == null || ct.isEmpty()) ? "home" : ct);
+            g.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            b.addAction(0, cta, PendingIntent.getActivity(c, (id + "go").hashCode(), g, flags));
+        }
+        nm.notify(id.hashCode(), b.build());
     }
 }
