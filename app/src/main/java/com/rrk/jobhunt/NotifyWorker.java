@@ -59,6 +59,18 @@ public class NotifyWorker extends Worker {
         }
     }
 
+    private static android.graphics.Bitmap logo(Context c) {
+        try {
+            android.graphics.drawable.Drawable d = androidx.core.content.ContextCompat.getDrawable(c, R.drawable.ic_launcher);
+            if (d == null) return null;
+            android.graphics.Bitmap b = android.graphics.Bitmap.createBitmap(192, 192, android.graphics.Bitmap.Config.ARGB_8888);
+            android.graphics.Canvas cv = new android.graphics.Canvas(b);
+            d.setBounds(0, 0, 192, 192);
+            d.draw(cv);
+            return b;
+        } catch (Exception e) { return null; }
+    }
+
     public static void show(Context c, String id, String title, String msg, String cta, String ct) {
         NotificationManager nm = (NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= 26) nm.createNotificationChannel(new NotificationChannel("ev_notif2", "Mission Control", NotificationManager.IMPORTANCE_HIGH));
@@ -67,7 +79,9 @@ public class NotifyWorker extends Worker {
         i.putExtra("nid", id);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         NotificationCompat.Builder b = new NotificationCompat.Builder(c, "ev_notif2")
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(R.drawable.ic_stat)
+                .setColor(0xFFD6B06A)
+                .setLargeIcon(logo(c))
                 .setContentTitle(title)
                 .setContentText(msg)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
