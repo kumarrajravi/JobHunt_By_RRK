@@ -8,66 +8,55 @@
 <script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{
-  --bg:#04060d;--card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.075);
-  --ink:#eceff7;--mut:#8b94aa;--line:rgba(255,255,255,.085);
-  --pk:#d6b06a;--pu:#6a74e6;--cy:#9fc3ff;--lm:#86e0b8;
-  --g:linear-gradient(135deg,#f4e6bd 0%,#d6b06a 55%,#b0833a 100%);
-  --bg-glow1:rgba(70,82,170,.28); --bg-glow2:rgba(36,70,110,.22); --bg-glow3:rgba(90,60,120,.18);
-  padding-top:env(safe-area-inset-top,0px)
-}
-body.day-mode {
-  --bg:#f2f5f9;--card:#ffffff;--card2:#f0f2f5;
-  --ink:#1a1a2e;--mut:#666666;--line:rgba(0,0,0,.1);
-  --pk:#d6b06a;--pu:#4a5fc1;--cy:#0077b6;--lm:#2a9d8f;
-  --g:linear-gradient(135deg,#e5c687,#c5a059 55%,#b0833a);
-  --bg-glow1:rgba(200,220,255,.4); --bg-glow2:rgba(220,240,255,.5); --bg-glow3:rgba(240,220,255,.3);
-  background: #f2f5f9;
-}
-
+:root{--bg:#04060d;--card:rgba(255,255,255,.04);--card2:rgba(255,255,255,.075);--ink:#eceff7;--mut:#8b94aa;--line:rgba(255,255,255,.085);--pk:#d6b06a;--pu:#6a74e6;--cy:#9fc3ff;--lm:#86e0b8;--g:linear-gradient(135deg,#f4e6bd 0%,#d6b06a 55%,#b0833a 100%);--glow1:rgba(70,82,170,.28);--glow2:rgba(36,70,110,.22);--glow3:rgba(90,60,120,.18);padding-top:env(safe-area-inset-top,0px)}
+body.day-mode{--bg:#f2f5f9;--card:#fff;--card2:#f0f2f5;--ink:#1a1a2e;--mut:#666;--line:rgba(0,0,0,.1);--pu:#4a5fc1;--cy:#0077b6;--lm:#2a9d8f;--g:linear-gradient(135deg,#e5c687,#c5a059 55%,#b0833a);--glow1:rgba(200,220,255,.4);--glow2:rgba(220,240,255,.5);--glow3:rgba(240,220,255,.3)}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:radial-gradient(1100px 520px at 85% -8%,var(--bg-glow1),transparent 60%),radial-gradient(900px 600px at -10% 40%,var(--bg-glow2),transparent 60%),radial-gradient(700px 500px at 60% 110%,var(--bg-glow3),transparent 60%),var(--bg);color:var(--ink);font:15px/1.5 "SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;min-height:100vh;overflow-x:hidden;transition:background .3s, color .3s}
-main{max-width:480px;margin:0 auto;padding:16px 18px 110px}
-h1{font-size:2rem;line-height:1.08;letter-spacing:-.04em;margin:6px 0 8px;font-weight:900}h1 em{font-style:normal;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
+body{margin:0;background:radial-gradient(1100px 520px at 85% -8%,var(--glow1),transparent 60%),radial-gradient(900px 600px at -10% 40%,var(--glow2),transparent 60%),radial-gradient(700px 500px at 60% 110%,var(--glow3),transparent 60%),var(--bg);color:var(--ink);font:15px/1.5 "SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;letter-spacing:.005em;min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+main{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:16px 18px 110px}
+h1{font-size:2rem;line-height:1.08;letter-spacing:-.025em;margin:6px 0 8px;font-weight:700}h1 em{font-style:normal;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}
 h2{margin:0;font-size:1.1rem;letter-spacing:-.02em}h3{margin:0 0 10px;font-size:.78rem;text-transform:uppercase;letter-spacing:.12em;color:var(--mut)}
 p.sub{color:var(--mut);margin:0 0 20px}
-.top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}.logo{font-weight:900;letter-spacing:-.03em;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.05rem}.logo small{-webkit-text-fill-color:var(--mut);font-weight:600;margin-left:6px}
-.glass{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:14px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
-body.day-mode .glass, body.day-mode .card, body.day-mode .kpi, body.day-mode .tile, body.day-mode .sec, body.day-mode .cap, body.day-mode .drop { box-shadow: 0 4px 20px rgba(0,0,0,.05); }
-input,select{width:100%;font:inherit;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:10px;outline:none;transition:all .2s}
-input:focus,select:focus{border-color:var(--pk)}select option{color:#000}
-.btn{display:block;width:100%;text-align:center;font:inherit;font-weight:800;color:#1a1307;background:var(--g);border:0;border-radius:18px;padding:15px;margin-top:20px;cursor:pointer;box-shadow:0 10px 30px rgba(214,176,106,.25)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.logo{font-weight:900;letter-spacing:-.03em;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.05rem}.logo small{-webkit-text-fill-color:var(--mut);font-weight:600;margin-left:6px}
+.topr{display:flex;align-items:center;gap:6px;color:var(--mut);font-size:.8rem}.topr button{position:relative;line-height:0;padding:6px}
+.badge{position:absolute;top:0;right:0;min-width:16px;height:16px;border-radius:99px;background:var(--pk);color:#1a1307;font-size:.62rem;font-style:normal;font-weight:800;line-height:16px;text-align:center;padding:0 4px}
+.glass,.card,.kpi,.tile,.sec,.cap,.drop{background:var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 12px 40px rgba(0,0,0,.35)}
+body.day-mode .glass,body.day-mode .card,body.day-mode .kpi,body.day-mode .tile,body.day-mode .sec,body.day-mode .cap,body.day-mode .drop{box-shadow:0 4px 14px rgba(0,0,0,.06)}
+.glass{border-radius:24px;padding:18px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);margin-bottom:14px}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:10px;outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--pk)}select option{color:#000}input[type=file]{display:none}
+.btn{display:block;width:100%;text-align:center;font:inherit;font-weight:700;letter-spacing:.02em;color:#1a1307;background:var(--g);border:0;border-radius:18px;padding:15px;margin-top:20px;cursor:pointer;box-shadow:0 8px 24px rgba(214,176,106,.22),inset 0 1px 0 rgba(255,255,255,.4)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.35}
 .btn.ghost{background:var(--card2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.btn.sm{padding:11px;margin:0;font-size:.86rem}
 .txt{background:none;border:0;color:var(--mut);font:inherit;cursor:pointer;padding:6px 0}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.chip{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 14px;border-radius:99px;cursor:pointer}.chip.on{background:var(--g);color:#1a1307;border-color:transparent;font-weight:800}
 .dd{max-height:260px;overflow:auto;border-radius:16px;margin-top:6px;background:var(--card);border:1px solid var(--line)}.dd:empty{display:none}.dd button{display:block;width:100%;text-align:left;color:var(--ink);background:none;border:0;padding:12px 16px;font:inherit;border-bottom:1px solid var(--line)}.dd .st{color:var(--lm)}
-.drop{display:block;border:1.5px dashed var(--line);border-radius:22px;padding:28px 16px;text-align:center;color:var(--mut);cursor:pointer;background:var(--card)}.drop b{display:block;color:var(--ink)}.drop.has{border-color:var(--cy);color:var(--cy)}input[type=file]{display:none}
-.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.kpi{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px 8px;text-align:center}.kpi b{display:block;font-size:1.6rem;line-height:1.1;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}.kpi small{color:var(--mut);font-size:.72rem}
+.drop{display:block;border:1.5px dashed var(--line);border-radius:22px;padding:28px 16px;text-align:center;color:var(--mut);cursor:pointer}.drop b{display:block;color:var(--ink)}.drop.has{border-color:var(--cy);color:var(--cy)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.kpi{border-radius:20px;padding:14px 8px;text-align:center}.kpi small{color:var(--mut);font-size:.72rem}
+.kpi b,.tile b{display:block;line-height:1.1;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}.kpi b{font-size:1.6rem}.tile b{font-size:1.7rem}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.tile{border-radius:20px;padding:14px}.tile small{color:var(--mut);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
 .tabs{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-around;background:var(--card);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
-.tabs button{background:none;border:0;color:var(--mut);font:inherit;font-size:.72rem;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 14px;cursor:pointer}.tabs button span{font-size:1.35rem}.tabs button.on{color:var(--pk);font-weight:800}
-.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:28px;padding:20px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:in .4s ease;box-shadow:0 14px 50px rgba(0,0,0,.1)}
+.tabs button{background:none;border:0;color:var(--mut);font:inherit;font-size:.72rem;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 14px;cursor:pointer}.tabs button span{display:grid;place-items:center;height:24px}.tabs button.on{color:var(--pk);font-weight:800}
+.card{position:relative;border-radius:28px;padding:20px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:in .4s ease}
 .card[data-s=apply]{border-color:var(--lm)}.card[data-s=skip]{border-color:var(--pk)}
 .card[data-s=apply]:after,.card[data-s=skip]:before{position:absolute;top:16px;font-weight:900;letter-spacing:.1em;padding:4px 12px;border-radius:10px;font-size:1.05rem;transform:rotate(-8deg)}
 .card[data-s=apply]:after{content:"APPLY";left:16px;color:var(--lm);border:2px solid var(--lm)}.card[data-s=skip]:before{content:"SKIP";right:16px;color:var(--pk);border:2px solid var(--pk)}
 @keyframes in{from{opacity:0;transform:translateY(16px) scale(.97)}to{opacity:1;transform:none}}
-.tut-swipe{animation:swipeTut 3s infinite ease-in-out}
-@keyframes swipeTut{0%,100%{transform:rotate(0) translateX(0)}25%{transform:rotate(4deg) translateX(40px)}50%{transform:rotate(0) translateX(0)}75%{transform:rotate(-4deg) translateX(-40px)}}
-.tut-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.85);padding:10px 20px;border-radius:20px;font-weight:bold;z-index:10;pointer-events:none;white-space:nowrap;border:1px solid var(--pk);color:#fff;font-size:0.9rem;box-shadow:0 4px 15px rgba(0,0,0,0.5)}
+.tut-swipe{animation:swipeTut 3s infinite ease-in-out}@keyframes swipeTut{0%,100%{transform:rotate(0) translateX(0)}25%{transform:rotate(4deg) translateX(40px)}50%{transform:rotate(0) translateX(0)}75%{transform:rotate(-4deg) translateX(-40px)}}
+.tut-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.85);padding:10px 20px;border-radius:20px;font-weight:bold;z-index:10;pointer-events:none;white-space:nowrap;border:1px solid var(--pk);color:#fff;font-size:.9rem}
 .hd{display:flex;gap:14px;align-items:center}.hd h2{line-height:1.25}.co{color:var(--mut);font-size:.9rem}
-.lg{position:relative;flex:none;width:56px;height:56px;min-width:56px;min-height:56px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;overflow:hidden;margin-top:2px}.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:6px;display:none}.lg.ok img{display:block}.lg.s{width:40px;height:40px;min-width:40px;min-height:40px;border-radius:12px;font-size:.8rem}
-.ring{--p:0;flex:none;margin-left:auto;width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--pk) calc(var(--p)*1%),rgba(0,0,0,.08) 0);display:grid;place-items:center}.ring i{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:900;font-size:.85rem}.ring.big{width:104px;height:104px}.ring.big i{width:84px;height:84px;font-size:1.7rem}
-.tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 4px}.tag{font-size:.76rem;background:rgba(255,255,255,.1);padding:4px 11px;border-radius:99px}.tag.hot{background:rgba(214,176,106,.14);color:var(--pk)}
-body.day-mode .tag{background:rgba(0,0,0,.05)}body.day-mode .tag.hot{background:rgba(214,176,106,.2);color:#b0833a}
+.lg{position:relative;flex:none;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:900;overflow:hidden}.lg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;padding:6px;display:none}.lg.ok img{display:block}.lg.s{width:40px;height:40px;border-radius:12px;font-size:.8rem}
+.ring{--p:0;flex:none;margin-left:auto;width:54px;height:54px;border-radius:50%;background:conic-gradient(var(--pk) calc(var(--p)*1%),rgba(128,128,128,.18) 0);display:grid;place-items:center}.ring i{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-weight:900;font-size:.85rem}.ring.big{width:104px;height:104px}.ring.big i{width:84px;height:84px;font-size:1.7rem}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0 4px}.tag{font-size:.76rem;background:rgba(128,128,128,.14);padding:4px 11px;border-radius:99px}.tag.hot{background:rgba(214,176,106,.16);color:var(--pk)}
 .bl{margin:10px 0;padding:0;list-style:none}.bl li{display:flex;gap:10px;padding:6px 0;font-size:.92rem}.bl li:before{content:"\2726";color:var(--cy)}
 .acts{display:grid;gap:10px;margin-top:12px}
-.act{display:flex;align-items:center;gap:14px;text-align:left;border:0;border-radius:20px;padding:14px 16px;font:inherit;cursor:pointer;color:#12091f;background:linear-gradient(135deg,#ecd9aa,#c9a35f);transition:transform .12s}.act:active{transform:scale(.97)}.act span{font-size:1.7rem}.act b{display:block;line-height:1.2}.act small{display:block;opacity:.75;font-size:.76rem}
-.act.a2{background:linear-gradient(135deg,#27325f,#3b4a8f);color:#eef2ff}.act.a3{background:linear-gradient(135deg,#1b473f,#2a7a6a);color:#e8fff6}.act.a4{background:var(--card2);color:var(--ink)}
+.act{display:flex;align-items:center;gap:14px;text-align:left;border:0;border-radius:20px;padding:14px 16px;font:inherit;cursor:pointer;color:#1a1307;background:linear-gradient(135deg,#ecd9aa,#c9a35f);transition:transform .12s}.act:active{transform:scale(.97)}.act span{display:grid;place-items:center;width:34px}.act b{display:block;line-height:1.2}.act small{display:block;opacity:.75;font-size:.76rem}
+.act.a2{background:linear-gradient(135deg,#27325f,#3b4a8f);color:#eef2ff}.act.a3{background:linear-gradient(135deg,#1b473f,#2a7a6a);color:#e8fff6}.act.a4{background:var(--card2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.act.busy{opacity:.6;pointer-events:none}
 .nav{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:8px;margin-top:14px}.nav button{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:12px;cursor:pointer}.nav .ok{background:rgba(134,224,184,.12);color:var(--lm);border-color:transparent;font-weight:800}.nav button:disabled{opacity:.3}
 .hint{text-align:center;color:var(--mut);font-size:.8rem;margin:10px 0 16px}
-.bar{height:9px;border-radius:9px;background:rgba(0,0,0,.08);overflow:hidden;margin:5px 0 10px}.bar i{display:block;height:100%;border-radius:9px;background:var(--g)}
+.bar{height:9px;border-radius:9px;background:rgba(128,128,128,.18);overflow:hidden;margin:5px 0 10px}.bar i{display:block;height:100%;border-radius:9px;background:var(--g)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.88rem}.row b{font-weight:800}
-.mw{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mw span{font-size:.74rem;padding:3px 10px;border-radius:99px;background:rgba(134,224,184,.15);color:#1b7a5a}.mw span.m{background:rgba(214,176,106,.15);color:#9a6e2b}
+.mw{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.mw span{font-size:.74rem;padding:3px 10px;border-radius:99px;background:rgba(134,224,184,.14);color:var(--lm)}.mw span.m{background:rgba(214,176,106,.15);color:var(--pk)}
 .ban{background:linear-gradient(135deg,#ecd9aa,#c9a35f);color:#1a1307;border-radius:18px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:700}.ban button{font:inherit;font-weight:800;border:0;background:#1a1307;color:#fff;border-radius:12px;padding:8px 14px}
 .note{color:var(--mut);font-size:.85rem;margin:0 0 12px}
 .app{display:grid;grid-template-columns:40px 1fr;gap:4px 12px;padding:12px 0;border-top:1px solid var(--line)}.app .x{display:flex;gap:8px;grid-column:1/3}.app select{margin:0;padding:8px 10px;font-size:.82rem;flex:1}
@@ -76,91 +65,49 @@ body.day-mode .tag{background:rgba(0,0,0,.05)}body.day-mode .tag.hot{background:
 .fx.rocket{animation:rk .95s ease-in forwards}@keyframes rk{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-50%,-62%) scale(1.4)}100%{transform:translate(55vw,-95vh) scale(.1) rotate(25deg);opacity:.3}}
 .fx.mail{animation:dp .7s cubic-bezier(.3,1.5,.5,1) forwards}@keyframes dp{0%{transform:translate(-50%,-100vh)}100%{transform:translate(-50%,-50%)}}
 .fx.tick{animation:tk .6s ease-out forwards}@keyframes tk{0%{transform:translate(-50%,-50%) scale(0)}60%{transform:translate(-50%,-50%) scale(1.3)}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
-#sp{position:fixed;inset:0;z-index:50;background:radial-gradient(900px 600px at 50% 110%,#4b1d96,#0b0714 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#sp,#cdn{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(900px 600px at 50% 110%,rgba(80,90,180,.4),#04060d 70%);color:#eceff7}
+#sp{z-index:50}#cdn{z-index:60}
+body.day-mode #sp,body.day-mode #cdn{background:radial-gradient(900px 600px at 50% 110%,#e0e8f0,#f2f5f9 70%);color:#1a1a2e}
 #sp .st{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;animation:tw 1.6s infinite alternate}@keyframes tw{from{opacity:.2}to{opacity:1}}
 #sp svg.r{width:150px;animation:fly 2.4s cubic-bezier(.2,.8,.2,1) forwards}@keyframes fly{0%{transform:translateY(60vh) rotate(-8deg) scale(.7)}55%{transform:translateY(-4vh) rotate(6deg) scale(1.08)}75%{transform:translateY(0) rotate(-3deg) scale(1)}100%{transform:translateY(-2vh) rotate(0) scale(1)}}
-svg.r{display:block;margin:0 auto;filter:drop-shadow(0 12px 28px rgba(255,94,196,.55))}.wob{animation:wb 1.6s ease-in-out infinite alternate}@keyframes wb{from{transform:rotate(-4deg) translateY(0)}to{transform:rotate(4deg) translateY(-8px)}}
+svg.r{display:block;margin:0 auto;filter:drop-shadow(0 12px 28px rgba(214,176,106,.35))}.wob{animation:wb 1.6s ease-in-out infinite alternate}@keyframes wb{from{transform:rotate(-4deg) translateY(0)}to{transform:rotate(4deg) translateY(-8px)}}
 #sp h1{margin-top:22px;font-size:2.3rem;text-align:center;animation:gl 2.4s ease forwards}@keyframes gl{0%{opacity:0;letter-spacing:.5em;filter:blur(8px)}60%{opacity:1;letter-spacing:-.02em;filter:blur(0)}70%{transform:translateX(3px)}80%{transform:translateX(-3px)}100%{transform:none}}
 #sp p{color:var(--mut);margin:0;animation:in 1s 1.2s both}
-#sp .ld{width:160px;height:5px;border-radius:5px;background:rgba(255,255,255,.12);margin-top:26px;overflow:hidden}#sp .ld i{display:block;height:100%;width:0;background:var(--g);animation:ldg 2.6s ease forwards}@keyframes ldg{to{width:100%}}
-.cap{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:12px 14px;margin:8px 0 16px}.cap svg.r{flex:none}.cap b.n{color:var(--cy);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;display:block}.cap p{margin:2px 0 0;font-size:.9rem}
-.mod{position:fixed;inset:0;z-index:40;background:rgba(5,2,12,.7);display:flex;align-items:center;justify-content:center;padding:24px}.mod .glass{max-width:380px;width:100%;background:var(--card);margin:0}
-body.day-mode .mod { background:rgba(255,255,255,.7); }
-.chk{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:.8rem;color:var(--mut)}.chk input{width:20px;height:20px;margin:2px 0 0;flex:none}
-#cdn{position:fixed;inset:0;z-index:60;background:radial-gradient(900px 600px at 50% 100%,#4b1d96,#0b0714 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#sp .ld{width:160px;height:5px;border-radius:5px;background:rgba(128,128,128,.25);margin-top:26px;overflow:hidden}#sp .ld i{display:block;height:100%;width:0;background:var(--g);animation:ldg 2.6s ease forwards}@keyframes ldg{to{width:100%}}
 #cdn .n{font-size:7rem;font-weight:900;line-height:1.1;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent;animation:np .9s ease-out}@keyframes np{0%{transform:scale(2.2);opacity:0}30%{opacity:1}100%{transform:scale(.9);opacity:.9}}
 #cdn p{color:var(--mut);letter-spacing:.25em;text-transform:uppercase;margin:0 0 10px}
 #cdn svg.r{width:110px;margin-top:20px;animation:sh .08s infinite alternate}@keyframes sh{from{transform:translate(-2px,0)}to{transform:translate(2px,-2px)}}
 #cdn.go svg.r{animation:lift .8s ease-in forwards}@keyframes lift{to{transform:translateY(-120vh) scale(.5)}}
-.sec{background:var(--card);border:1px solid var(--line);border-radius:22px;margin-bottom:12px;overflow:hidden}.sec summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:800;display:flex;gap:12px;align-items:center;color:var(--ink)}.sec summary::-webkit-details-marker{display:none}.sec summary:after{content:"\203A";margin-left:auto;color:var(--mut);font-size:1.3rem;transition:transform .2s}.sec[open] summary:after{transform:rotate(90deg)}.sec .in{padding:0 18px 18px;animation:slideDown 0.25s ease-out}@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.cap{display:flex;gap:12px;align-items:center;border-radius:22px;padding:12px 14px;margin:8px 0 16px}.cap b.n{color:var(--cy);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;display:block}.cap p{margin:2px 0 0;font-size:.9rem}
+.mod{position:fixed;inset:0;z-index:40;background:rgba(2,3,8,.78);display:flex;align-items:center;justify-content:center;padding:24px}.mod .glass{max-width:380px;width:100%;margin:0;background:var(--card)}
+body.day-mode .mod{background:rgba(240,245,255,.72)}
+.mod.sheet{align-items:flex-end;padding:0}.mod.sheet .glass{max-width:520px;max-height:80vh;overflow:auto;border-radius:26px 26px 0 0;background:var(--bg)}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:.8rem;color:var(--mut)}.chk input{width:20px;height:20px;margin:2px 0 0;flex:none}
+.sec{border-radius:22px;margin-bottom:12px;overflow:hidden}.sec summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:800;display:flex;gap:12px;align-items:center}.sec summary::-webkit-details-marker{display:none}.sec summary:after{content:"\203A";margin-left:auto;color:var(--mut);font-size:1.3rem;transition:transform .2s}.sec[open] summary:after{transform:rotate(90deg)}.sec .in{padding:0 18px 18px}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 .hero{display:flex;gap:14px;align-items:center;margin:4px 0 16px}.hero svg.r{flex:none}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.tile{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:14px}.tile b{display:block;font-size:1.7rem;line-height:1.1;background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}.tile small{color:var(--mut);font-size:.74rem;text-transform:uppercase;letter-spacing:.08em}
 .lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mut);margin:10px 0 4px}
-.mrow{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}.mrow div{flex:1;min-width:0}.mrow b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gal{display:flex;flex-wrap:wrap;justify-content:space-around;gap:20px 8px;margin:14px 0 18px;padding-bottom:20px;height:auto!important}
-.gx{position:relative;text-align:center;cursor:pointer;background:none;border:0;color:var(--ink);font:inherit;padding:0;width:45%!important;display:flex;flex-direction:column;align-items:center;animation:drift var(--d,12s) ease-in-out infinite alternate;margin-left:0!important;left:auto!important;top:auto!important;margin-top:0}
-.gx:nth-child(even){margin-top:40px}
+.mrow{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}.mrow div{flex:1;min-width:0}.mrow b{display:block}.mrow>div>span,.mrow>div>small{display:block}.mrow:first-of-type{border-top:0}
+.gal{display:flex;flex-wrap:wrap;justify-content:space-around;gap:18px 8px;margin:14px 0 18px;padding-bottom:20px}
+.gx{position:relative;text-align:center;cursor:pointer;background:none;border:0;color:var(--ink);font:inherit;padding:0;width:46%;display:flex;flex-direction:column;align-items:center;animation:drift var(--d,12s) ease-in-out infinite alternate}
 @keyframes drift{from{transform:translate(0,0)}to{transform:translate(var(--dx,6px),var(--dy,6px))}}
-.gx .gn,.gx .gs{text-align:center}
-.gx .orb{position:relative;width:132px;height:132px;margin:0 auto}
-.gx .orb i{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,94,196,0),rgba(255,94,196,.9),rgba(122,92,255,0) 35%,rgba(0,229,255,.85),rgba(0,229,255,0) 70%,rgba(198,255,61,.55),rgba(255,94,196,0));-webkit-mask:radial-gradient(circle,transparent 14%,#000 15%,#000 68%,transparent 70%);mask:radial-gradient(circle,transparent 14%,#000 15%,#000 68%,transparent 70%);animation:rev 24s linear infinite;filter:hue-rotate(var(--h,0deg))}
-.gx .orb i+i{inset:16px;animation-duration:16s;animation-direction:reverse;opacity:.85}
-.gx .orb b{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px;border-radius:50%;background:radial-gradient(circle,#fff,#ffd9f4 40%,transparent 70%);box-shadow:0 0 28px 8px rgba(255,150,230,.7);animation:pu 3s ease-in-out infinite alternate;filter:hue-rotate(var(--h,0deg))}
-.gx .orb u{position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff;box-shadow:0 0 8px #fff;animation:orb 9s linear infinite}
-@keyframes rev{to{transform:rotate(360deg)}}@keyframes pu{from{transform:scale(.8)}to{transform:scale(1.25)}}@keyframes orb{from{transform:rotate(0) translateX(58px)}to{transform:rotate(360deg) translateX(58px)}}
-.gn{font-weight:700;font-size:.9rem;margin-top:8px}.gs{font-size:.78rem;color:var(--mut);margin-top:2px}.gs b{color:var(--lm)}.gc{width:150px;height:150px;display:block;margin:0 auto}
-.tip{position:fixed;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:440px;background:var(--card);border:1px solid var(--pk);border-radius:20px;padding:14px 16px;pointer-events:auto;transition:top .5s}.tip b{color:var(--cy);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}.tip p{margin:4px 0 10px}
+.gn{font-weight:700;font-size:.9rem;margin-top:8px;text-align:center}.gs{font-size:.78rem;color:var(--mut);margin-top:2px;text-align:center}.gs b{color:var(--lm)}
 .mbox{max-height:62vh;overflow:auto;margin-top:10px}.chg{border-top:1px solid var(--line);padding:10px 0;font-size:.86rem}.chg s{color:var(--mut)}.chg em{font-style:normal;color:var(--lm);display:block;margin-top:4px}
-
-body{background:radial-gradient(1100px 520px at 85% -8%,var(--bg-glow1),transparent 60%),radial-gradient(900px 600px at -10% 40%,var(--bg-glow2),transparent 60%),radial-gradient(700px 500px at 60% 110%,var(--bg-glow3),transparent 60%),var(--bg);font-family:"SF Pro Display","Segoe UI",Roboto,system-ui,sans-serif;letter-spacing:.005em}
 #stars{position:fixed;inset:0;z-index:0;pointer-events:none}#stars i{position:absolute;left:0;top:0;width:1px;height:1px;border-radius:50%;background:transparent}#stars i.tw{animation:twk 5s ease-in-out infinite alternate}@keyframes twk{from{opacity:.2}to{opacity:1}}
-main{position:relative;z-index:1}
-h1{font-weight:650;letter-spacing:-.025em}
-.glass,.card,.kpi,.tile,.sec,.cap,.drop{background:var(--card);border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 12px 40px rgba(0,0,0,.35)}
-body.day-mode .glass,body.day-mode .card,body.day-mode .kpi,body.day-mode .tile,body.day-mode .sec,body.day-mode .cap,body.day-mode .drop{box-shadow:0 4px 12px rgba(0,0,0,.05);background:var(--card)}
-.btn{background:var(--g);color:#1a1307;box-shadow:0 8px 24px rgba(214,176,106,.22),inset 0 1px 0 rgba(255,255,255,.4);font-weight:700;letter-spacing:.02em}
-.btn.ghost{background:var(--card2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
-.chip.on{background:var(--g);color:#1a1307}
-.act{background:linear-gradient(135deg,#ecd9aa,#c9a35f);color:#1a1307}.act.a2{background:linear-gradient(135deg,#27325f,#3b4a8f);color:#eef2ff}.act.a3{background:linear-gradient(135deg,#1b473f,#2a7a6a);color:#e8fff6}.act.a4{background:var(--card2);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
-.act span{display:grid;place-items:center;width:34px}.act span svg{display:block}
-.tag.hot{background:rgba(214,176,106,.14);color:var(--pk)}.tag{background:rgba(255,255,255,.07)}
-body.day-mode .tag{background:rgba(0,0,0,.05)}body.day-mode .tag.hot{background:rgba(214,176,106,.2);color:#b0833a}
-.ban{background:linear-gradient(135deg,#ecd9aa,#c9a35f)}
-.tabs{background:var(--card);border-top:1px solid var(--line)}.tabs button.on{color:var(--pk)}.tabs button span{display:grid;place-items:center;height:24px}
-.ring{background:conic-gradient(var(--pk) calc(var(--p)*1%),rgba(255,255,255,.1) 0)}.ring i{background:var(--bg)}
-.kpi b,.tile b{background:var(--g);-webkit-background-clip:text;background-clip:text;color:transparent}.bar i{background:var(--g)}
-.dd,.mod .glass{background:var(--card)}.mod{background:rgba(2,3,8,.78)}
-body.day-mode .mod{background:rgba(240,245,255,.7)}
-#sp,#cdn{background:radial-gradient(900px 600px at 50% 110%,rgba(80,90,180,.4),#04060d 70%)}
-body.day-mode #sp,body.day-mode #cdn{background:radial-gradient(900px 600px at 50% 110%,#e0e8f0,#f2f5f9 70%)}
-input,select{background:var(--card2)}input:focus,select:focus{border-color:var(--pk)}
-.mw span{background:rgba(134,224,184,.12);color:var(--lm)}.mw span.m{background:rgba(214,176,106,.14);color:var(--pk)}
-.nav .ok{background:rgba(134,224,184,.12);color:var(--lm)}
-.card[data-s=apply]{border-color:var(--lm)}.card[data-s=skip]{border-color:var(--pk)}.card[data-s=apply]:after{color:var(--lm);border-color:var(--lm)}.card[data-s=skip]:before{color:var(--pk);border-color:var(--pk)}
-
-.page-fade { animation: fadeInPage 0.2s ease-out; }
-@keyframes fadeInPage { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-.toggle { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
-.toggle input { opacity: 0; width: 0; height: 0; }
-.toggle .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #22222A; border: 1px solid var(--line); transition: .3s; border-radius: 34px; }
-.toggle .slider:before { position: absolute; content: "✦"; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; left: 4px; bottom: 3px; background-color: var(--mut); color: #000; transition: .3s; border-radius: 50%; font-size: 10px; font-weight: bold; }
-.toggle input:checked + .slider { background: var(--g); border-color: transparent; box-shadow: 0 0 10px rgba(214,176,106,.3); }
-.toggle input:checked + .slider:before { transform: translateX(22px); background-color: #1a1307; color: var(--pk); }
-
-.theme-toggle { display: inline-flex; background: var(--card2); border: 1px solid var(--line); border-radius: 12px; padding: 2px; gap: 2px; }
-.theme-toggle button { background: transparent; border: 0; padding: 6px 10px; border-radius: 10px; cursor: pointer; color: var(--mut); display: flex; align-items: center; justify-content: center; transition: all .2s; }
-.theme-toggle button.active { background: var(--card); color: var(--ink); box-shadow: 0 2px 5px rgba(0,0,0,.1); }
+body.day-mode #stars{display:none}
+.page-fade{animation:fadeInPage .2s ease-out}@keyframes fadeInPage{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.toggle{position:relative;display:inline-block;width:50px;height:28px;flex-shrink:0}.toggle input{opacity:0;width:0;height:0}
+.toggle .slider{position:absolute;cursor:pointer;inset:0;background:var(--card2);border:1px solid var(--line);transition:.3s;border-radius:34px}
+.toggle .slider:before{position:absolute;content:"\2726";display:flex;align-items:center;justify-content:center;height:20px;width:20px;left:4px;bottom:3px;background:var(--mut);color:#000;transition:.3s;border-radius:50%;font-size:10px;font-weight:bold}
+.toggle input:checked+.slider{background:var(--g);border-color:transparent}.toggle input:checked+.slider:before{transform:translateX(22px);background:#1a1307;color:var(--pk)}
+.theme-toggle{display:inline-flex;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:2px;gap:2px}.theme-toggle button{background:transparent;border:0;padding:6px 10px;border-radius:10px;cursor:pointer;color:var(--mut);display:flex;align-items:center;justify-content:center}.theme-toggle button.active{background:var(--card);color:var(--ink)}
 </style>
 </head>
 <body>
 <main>
-  <div class="top" style="align-items:baseline;">
+  <div class="top">
     <div class="logo">Escape Velocity<small>by RRK</small></div>
-    <span style="color:var(--mut);font-size:.8rem;margin-left:auto;display:flex;align-items:center;gap:10px;">
-      <button class="txt" data-a="gear" id="gi" style="display:none;padding:0;line-height:0"></button>
-      <span id="ver"></span>
-    </span>
+    <span class="topr"><button class="txt" data-a="bell" id="bl" style="display:none"></button><button class="txt" data-a="gear" id="gi" style="display:none"></button><span id="ver"></span></span>
   </div>
   <div id="ban"></div><div id="v"></div>
 </main>
@@ -171,33 +118,20 @@ input,select{background:var(--card2)}input:focus,select:focus{border-color:var(-
   <button data-a="tab" data-v="set"><span id="i4"></span>Settings</button>
 </nav>
 <script>
-const $=id=>document.getElementById(id),NATIVE=typeof Android!=="undefined",VER=NATIVE?Android.version():"1.8";
+const $=id=>document.getElementById(id),NATIVE=typeof Android!=="undefined",VER=NATIVE?Android.version():"1.9";
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const cfg=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";localStorage.setItem(k,v)}catch(e){return""}};
-const DB=Object.assign({name:"",email:"",rname:"",rt:"",roles:[],custom:[],locs:[],pay:"",jobs:{},goal:10,src:{},depth:"quick",phone:"",consent:false,launched:false,cur:"",pend:"",out:[],tour:{},tourOff:false,inbox:[],swipeTrained:false,noAnim:false,noGalaxyAnim:false,noWarpAnim:false,noDropdownAnim:false,theme:"night"},(()=>{try{return JSON.parse(cfg("ev")||"{}")}catch(e){return{}}})());
+const DB=Object.assign({name:"",email:"",rname:"",rfmt:"",rt:"",roles:[],custom:[],locs:[],pay:"",jobs:{},goal:10,src:{},depth:"quick",phone:"",consent:false,launched:false,cur:"",pend:"",out:[],inbox:[],swipeTrained:false,noAnim:false,noGalaxyAnim:false,noWarpAnim:false,noDropdownAnim:false,theme:"night",agencyContacts:false},(()=>{try{return JSON.parse(cfg("ev")||"{}")}catch(e){return{}}})());
 const save=()=>{try{cfg("ev",JSON.stringify(DB))}catch(e){}};
 const S={v:"",load:"",note:"",hist:[],edit:false,upd:null,cur:DB.cur||null,pend:DB.pend||"",prev:null,splash:true};
 $("ver").textContent="v"+VER;
-
-// Apply Theme
-function applyTheme() {
-    if (DB.theme === 'day' || (DB.theme === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-        document.body.classList.add('day-mode');
-    } else {
-        document.body.classList.remove('day-mode');
-    }
-    const meta = document.querySelector('meta[name="theme-color"]');
-    if(meta) meta.setAttribute('content', document.body.classList.contains('day-mode') ? '#f2f5f9' : '#0b0714');
-}
-applyTheme();
-window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
-    if (DB.theme === 'auto') applyTheme();
-});
+function applyTheme(){const d=DB.theme==="day"||(DB.theme==="auto"&&matchMedia("(prefers-color-scheme: light)").matches);document.body.classList.toggle("day-mode",d);const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",d?"#f2f5f9":"#0b0714")}
+applyTheme();matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{if(DB.theme==="auto")applyTheme()});
 
 const MASTER=["Brand Manager","Senior Brand Manager","Category Manager","Growth Manager","Marketing Manager","Product Marketing Manager","Performance Marketing Manager","Digital Marketing Manager","Social Media Manager","Content Marketing Manager","CRM Manager","Retention Manager","Trade Marketing Manager","Shopper Marketing Manager","E-commerce Manager","Key Account Manager","Business Development Manager","Sales Manager","Area Sales Manager","Regional Sales Manager","Account Manager","Product Manager","Senior Product Manager","Associate Product Manager","Program Manager","Project Manager","Operations Manager","Supply Chain Manager","Procurement Manager","Business Analyst","Data Analyst","Data Scientist","Marketing Analyst","Strategy Manager","Management Consultant","Chief of Staff","Founders Office","General Manager","Category Head","Head of Marketing","Head of Growth","VP Marketing","Software Engineer","Senior Software Engineer","Frontend Developer","Backend Developer","Full Stack Developer","Android Developer","QA Engineer","DevOps Engineer","UI/UX Designer","Graphic Designer","Content Writer","Copywriter","SEO Specialist","PR Manager","Communications Manager","Brand Strategist","Creative Director","Media Planner","Event Manager","HR Manager","Talent Acquisition Specialist","Finance Manager","Financial Analyst","Chartered Accountant","Investment Analyst","Customer Success Manager","Customer Support Lead","Store Manager","Merchandiser","Buyer","Vendor Manager","Quality Manager","Product Owner","Scrum Master","Technical Writer","Research Analyst","Teacher","Legal Counsel","Marketing Executive","Sales Executive","Digital Marketing Executive","Influencer Marketing Manager","Partnership Manager","Community Manager","Admin Executive"];
 const LOCS=["Bengaluru","Mumbai","Delhi NCR","Hyderabad","Pune","Chennai","Kolkata","Ahmedabad","Remote","Anywhere"];
 const AL={"Bengaluru":["bengaluru","bangalore"],"Delhi NCR":["delhi","noida","gurgaon","gurugram","faridabad"],"Remote":["remote"],"Anywhere":[""]};
-const PROV=[{id:"free",n:"Free crew (no key needed)",u:"https://text.pollinations.ai/openai",m:"mistral",k:0},
+const PROV=[{id:"free",n:"Free crew (no key needed)",u:"",m:"",k:0},
 {id:"gemini",n:"Google Gemini (free key, best quality)",u:"https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",m:"gemini-2.0-flash",k:1,h:"aistudio.google.com/apikey"},
 {id:"groq",n:"Groq - Llama 3.3 70B (free key, fastest)",u:"https://api.groq.com/openai/v1/chat/completions",m:"llama-3.3-70b-versatile",k:1,h:"console.groq.com/keys"},
 {id:"or",n:"OpenRouter - free open models",u:"https://openrouter.ai/api/v1/chat/completions",m:"meta-llama/llama-3.3-70b-instruct:free",k:1,h:"openrouter.ai/keys"},
@@ -207,7 +141,8 @@ const PROV=[{id:"free",n:"Free crew (no key needed)",u:"https://text.pollination
 {id:"openai",n:"ChatGPT (OpenAI)",u:"https://api.openai.com/v1/chat/completions",m:"gpt-4o-mini",k:1,h:"platform.openai.com/api-keys"},
 {id:"claude",n:"Claude (Anthropic)",u:"https://api.anthropic.com/v1/messages",m:"claude-haiku-4-5-20251001",k:1,h:"console.anthropic.com",f:"a"},
 {id:"custom",n:"My own server (Ollama, LM Studio...)",u:"",m:"",k:0}];
-const LOG=[{v:"1.8",n:"Sailing the Starstream",d:"24 Oct 2026",t:["Global settings access: the top gear now follows you through setup until the bottom tab takes over","Interactive galaxies: drag across them to spin them fully in 3D, or drag up and down to tilt","Warp drive engaged: a quick, immersive transition when entering or leaving a galaxy","Smooth page transitions (can be toggled in Settings)","Redesigned flight plan: clean icons that match the theme and dedicated action tiles","Swipe stamps swapped sides so they are always visible when applying or skipping","Timeline in settings now features connected dots for each version","Version log hides future updates until you install them","Replaced settings emojis with matching line icons","Added a subtle drop-down animation for settings sections","New high-speed hyperspace starfield warp animation with dissolve transition","Galaxy axis now fully controllable with 360-degree 3D rotation","Day / Night / Auto theme toggle added with complete redesign","Animation preferences added for Warp, Galaxy, Page, and Dropdown"]},
+const LOG=[{v:"1.9",n:"Trans-Lunar Injection",d:"25 Oct 2026",t:["Warp drive rebuilt: it begins as a slow drift, then accelerates until the stars streak past and the galaxy swallows you","Galaxies now spin round their own axis, faster and smoother, while the axis itself turns slowly. Drag to steer","AI crew rebuilt from scratch: one simple wrapper, a free route that no longer breaks on saved settings, and clear status in Settings","Email phraser: your wins are rewritten into clean first-person sentences in the tldr format, with or without an AI","Notification bell on top: all Mission Control messages, with action buttons, check for new and a test alert","Classy in-app dialogs replace the plain browser pop-ups","Tailor my resume rebuilt: keeps your original Word layout, or gives you a Word and PDF copy, with real achievement lines only","Referrals: recruitment firms show only the job poster, company jobs show people in your country first, then widen. New company-people link on LinkedIn","Agency contacts preference added, off by default","Housekeeping: dead code and duplicate styles removed"]},
+{v:"1.8",n:"Sailing the Starstream",d:"24 Oct 2026",t:["Global settings access: the top gear now follows you through setup until the bottom tab takes over","Interactive galaxies: drag across them to spin them fully in 3D, or drag up and down to tilt","Warp drive engaged: a quick, immersive transition when entering or leaving a galaxy","Smooth page transitions (can be toggled in Settings)","Redesigned flight plan: clean icons that match the theme and dedicated action tiles","Swipe stamps swapped sides so they are always visible when applying or skipping","Timeline in settings now features connected dots for each version","Version log hides future updates until you install them","Replaced settings emojis with matching line icons","Added a subtle drop-down animation for settings sections","New high-speed hyperspace starfield warp animation with dissolve transition","Galaxy axis now fully controllable with 360-degree 3D rotation","Day / Night / Auto theme toggle added with complete redesign","Animation preferences added for Warp, Galaxy, Page, and Dropdown"]},
 {v:"1.7",n:"Docking at the Deep Space Station",d:"23 Oct 2026",t:["Premium space theme: deep-space palette, champagne gold and silver accents, a quiet star-field and fine line icons","Galaxies now float freely across space, each with its own size and slow drift, instead of sitting in neat rows","Referral radar re-engineered: finds people through public search results first, then company scans, plus a one-tap LinkedIn people search that is always pre-filled","Notification drawer now carries the Escape Velocity logo"]},
 {v:"1.6",n:"Breaking Through the Atmosphere",d:"22 Oct 2026",t:["Quick tour is now optional: a simple next-next card tour, nothing forced and no fields to fill","Setup screens calmed down: no more glowing boxes or pop-up guides","Galaxies redrawn as real spiral galaxies, in the app's own font","Tailor my resume repaired: reads PDF lines properly and always finds spots to improve","Free AI wrapper with backup routes, quiet fallbacks and no more error banners","AI crew guide: step-by-step setup for every provider, auto-fill and a detailed Test","Notifications reach the top bar with action buttons, an instant check on open, Check now and Test alert","Smoother updates: live progress and automatic install after you allow it once","Web address now lives in config.js, so future updates never wipe it"]},
 {v:"1.5",n:"Countdown to the Galaxies",d:"18 Oct 2026",t:["Galaxy hub: every role you hunt becomes a slowly revolving, named galaxy with Found and Match counts. Tap one to explore it, or select them all","Captain A7's training now glides a glowing spotlight from step to step","Referral radar rebuilt: the 3 best contacts from your own vertical first, then search for more, with recruitment firms filtered out","Emails now always draft from your own resume wins and the job's keywords, with or without an AI","Tailor my resume: missing ATS keywords woven into your existing lines as Google XYZ sentences, ready to attach","Mission Control messages: witty notifications sent from HQ, with delivery and open reports","Settings sorted into tidy crew-quarters categories, plus a Test AI button","Home base rebuilt with clear stats, top matches and a clean flight plan","Retired a job galaxy that was not responding","Data-sharing note no longer shows a person's name"]},
@@ -216,48 +151,98 @@ const LOG=[{v:"1.8",n:"Sailing the Starstream",d:"24 Oct 2026",t:["Global settin
 {v:"1.2",n:"The Fumble Before Ignition",d:"15 Oct 2026",t:["Whole new cosmic cockpit and a lift-off opening","Welcome gate: crew name and email","Role radar: type or pick any role, new ones are remembered and ranked against your resume","Home base with bottom nav, plus Refresh to scan for more jobs","Wider job galaxies scanned in one go","Flight-check: ATS score dashboard on every job","Company briefing and a tight mission summary of each JD","Swipe cards: right to apply, left to skip","Referral crew finder and hiring-contact connect link","Mission Control dashboard: applications, pipeline, goals, follow-ups, insights","Crew list of free and famous AI brains, with the free one on by default","Jobs you skipped or applied to never re-enter orbit"]},
 {v:"1.1",n:"Blueprints on the Launchpad",d:"14 Oct 2026",t:["Minor bug fixes: patched small leaks in the hull","Free AI crew boarded the ship","Paid-only ChatGPT and Claude requirement ejected into deep space"]},
 {v:"1.0",n:"The Thought: A Plan Is Born",d:"13 Oct 2026",t:["First sketch of the mission: resume check-in, roles and location","Live job radar with mission cards","One-tap email launch to Gmail with your resume attached"]}];
-const P={};window.__cb=(id,c,t)=>{P[id]&&P[id](c,t);delete P[id]};window.__upd=m=>{const o=document.getElementById("um");if(o)o.remove();toast(m)};window.__prog=m=>{const e=document.getElementById("up");if(e)e.textContent=m};
+
+// ---------- network ----------
+const P={};window.__cb=(id,c,t)=>{P[id]&&P[id](c,t);delete P[id]};
+window.__upd=m=>{const o=$("um");if(o)o.remove();toast(m)};window.__prog=m=>{const e=$("up");if(e)e.textContent=m};
 function req(url,method,body,h){return new Promise((ok,no)=>{const bad=(c,t)=>no(new Error((c==401||c==403?"Check your key. ":"")+"HTTP "+c+" "+String(t).slice(0,100)));
  if(NATIVE){const id=Math.random().toString(36).slice(2);P[id]=(c,t)=>c>=200&&c<300?ok(t):bad(c,t);Android.http(id,url,method,JSON.stringify(h||{}),body||"")}
  else fetch(url,{method,headers:{"Content-Type":"application/json",...(h||{})},body:body||undefined}).then(async r=>{const t=await r.text();r.ok?ok(t):bad(r.status,t)}).catch(no)})}
-const prov=()=>PROV.find(p=>p.id==(cfg("llm")||"free"))||PROV[0];
-const aiOn=()=>{const p=prov();return !p.k||!!cfg("aikey")};
 const wto=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error("timed out")),ms))]);
+
+// ---------- AI wrapper (one simple path) ----------
+const prov=()=>PROV.find(p=>p.id==(cfg("llm")||"free"))||PROV[0];
+const aiOn=()=>{const p=prov();return p.id=="free"||(p.id=="custom"?!!cfg("aiurl"):!!cfg("aikey"))};
+(function(){const p=prov();if(p.id=="free"||cfg("aiurl")==p.u)cfg("aiurl","");if(p.id=="free"||cfg("aimodel")==p.m)cfg("aimodel","")})();
 const jsonOf=x=>{x=String(x||"");const a=x.indexOf("{"),b=x.lastIndexOf("}");if(a<0||b<=a)throw new Error("no JSON in reply");return JSON.parse(x.slice(a,b+1))};
 const txtOf=t=>{try{const o=JSON.parse(t);if(o.choices)return o.choices[0].message.content;if(o.content&&o.content[0])return o.content[0].text;if(typeof o=="string")return o}catch(e){}return t};
-async function freeAI(system,user){const errs=[],msgs=[{role:"system",content:system+" Reply with JSON only."},{role:"user",content:user}],T=[["Pollinations","https://text.pollinations.ai/openai",["","openai"],{}],["LLM7","https://api.llm7.io/v1/chat/completions",["default","gpt-4.1-nano"],{Authorization:"Bearer unused"}]]; 
- for(const [n,u,ms,hd] of T)for(const m of ms){try{const t=await wto(req(u,"POST",JSON.stringify({...(m?{model:m}:{}),messages:msgs,jsonMode:true}),hd),30000);return jsonOf(txtOf(t))}catch(e){errs.push(n+(m?"/"+m:"")+": "+String(e.message).slice(0,70))}}
- try{const t=await wto(req("https://text.pollinations.ai/"+encodeURIComponent((system+" Reply with JSON only. "+user).slice(0,5500))+"?json=true","GET"),30000);return jsonOf(txtOf(t))}catch(e){errs.push("Pollinations GET: "+String(e.message).slice(0,70))}
+const FREE=[["Pollinations","https://text.pollinations.ai/openai",["","openai"],{}],["LLM7","https://api.llm7.io/v1/chat/completions",["default","gpt-4.1-nano"],{Authorization:"Bearer unused"}]];
+async function freeAI(system,user){const errs=[],msgs=[{role:"system",content:system+" Reply with JSON only."},{role:"user",content:user}];
+ for(const [n,u,ms,hd] of FREE)for(const m of ms){try{return jsonOf(txtOf(await wto(req(u,"POST",JSON.stringify({...(m?{model:m}:{}),messages:msgs,jsonMode:true}),hd),25000)))}catch(e){errs.push(n+(m?"/"+m:"")+": "+String(e.message).slice(0,60))}}
+ try{return jsonOf(txtOf(await wto(req("https://text.pollinations.ai/"+encodeURIComponent((system+" Reply with JSON only. "+user).slice(0,5500))+"?json=true","GET"),25000)))}catch(e){errs.push("GET: "+String(e.message).slice(0,60))}
  throw new Error(errs.join(" | "))}
 async function ai(system,user,force){const p=prov(),k=cfg("aikey");if(!force&&S.aiDown&&Date.now()<S.aiDown)throw new Error("AI paused after repeated failures");
- try{let r;if(!p.k&&!cfg("aiurl"))r=await freeAI(system,user);else{const url=cfg("aiurl")||p.u,model=cfg("aimodel")||p.m;if(!url)throw new Error("set the endpoint URL in Settings");
-  if(p.f=="a"){const t=await wto(req(url,"POST",JSON.stringify({model,max_tokens:3000,system:system+" Reply with JSON only.",messages:[{role:"user",content:user}]}),{"x-api-key":k,"anthropic-version":"2023-06-01"}),45000);r=jsonOf(JSON.parse(t).content[0].text)}
-  else{const t=await wto(req(url,"POST",JSON.stringify({model,messages:[{role:"system",content:system+" Reply with JSON only."},{role:"user",content:user}]}),k?{Authorization:"Bearer "+k}:{}),45000);r=jsonOf(JSON.parse(t).choices[0].message.content)}}
-  S.aiFails=0;DB.aiLast="OK";return r}catch(e){S.aiFails=(S.aiFails||0)+1;if(S.aiFails>=2)S.aiDown=Date.now()+600000;DB.aiLast=e.message;throw e}}
+ try{let r;if(p.id=="free")r=await freeAI(system,user);else{const url=cfg("aiurl")||p.u,model=cfg("aimodel")||p.m;if(!url)throw new Error("set the endpoint URL in Settings");
+  if(p.f=="a")r=jsonOf(JSON.parse(await wto(req(url,"POST",JSON.stringify({model,max_tokens:3000,system:system+" Reply with JSON only.",messages:[{role:"user",content:user}]}),{"x-api-key":k,"anthropic-version":"2023-06-01"}),45000)).content[0].text);
+  else r=jsonOf(JSON.parse(await wto(req(url,"POST",JSON.stringify({model,messages:[{role:"system",content:system+" Reply with JSON only."},{role:"user",content:user}]}),k?{Authorization:"Bearer "+k}:{}),45000)).choices[0].message.content)}
+  S.aiFails=0;S.aiDown=0;DB.aiLast="OK";return r}catch(e){S.aiFails=(S.aiFails||0)+1;if(S.aiFails>=2)S.aiDown=Date.now()+300000;DB.aiLast=e.message;throw e}}
 const ENR='You help a job seeker. Given the candidate resume and job posts, return JSON {"jobs":[{"id":"<same id>","score":<0-100 fit>,"domain":"<company website domain or empty>","about":"<1-2 plain sentences on what the company does>","bullets":["what you will do","what they want","why you fit, or the gap"]}]}. Each bullet under 14 words.';
-const EML='Write a cold email from the candidate to the recruiter in this structure: first line "tldr;" then one sentence summary; blank line; "Hi <recruiter first name or Hiring Team>,"; one short paragraph: saw the role at the company, years of experience, most relevant employers; one paragraph with 3 to 4 proof points taken ONLY from the resume that match the job description (keep real numbers, never invent); a closing saying you would love to be part of the team, the resume is attached, happy to talk; then "Best," the name and email. Max 170 words, plain text. Subject format: "<Role> | <Company> | <Name>, <current title> (<years> yrs)". Return JSON {"subject":"","body":""}.';
+const EML='You polish cold emails. Keep the exact structure, every number and every fact of the draft. Only improve flow and wording so it reads natural, confident and concise (under 170 words). Return JSON {"subject":"","body":""}.';
+const TLR='Rewrite resume lines so they naturally include the missing ATS keywords, using the Google XYZ format: "Accomplished [X] as measured by [Y], by doing [Z]". Use ONLY facts already in the resume. Never invent numbers, employers or tools the candidate has not used. If a keyword cannot be added truthfully, skip it. Return JSON {"changes":[{"old":"<exact existing resume line>","new":"<rewritten line containing the keyword>","kw":"<keyword>"}]} with at most 6 changes.';
+
+// ---------- helpers ----------
 const col=s=>{let h=0;for(const c of s||"?")h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 30% 34%)`};
 const ago=s=>{const d=Math.floor((Date.now()-new Date(s))/864e5);return isNaN(d)?"":d<=0?"Today":d==1?"1 day ago":d+" days ago"};
 const dayAgo=t=>Math.floor((Date.now()-t)/864e5);
+const chip=(x,on,a)=>`<button class="chip${on?" on":""}" data-a="${a}" data-v="${esc(x)}">${esc(x)}</button>`;
+const openU=u=>NATIVE?Android.openUrl(u):window.open(u,"_blank");
 function logo(j,s){const ini=(j.c||"?").split(/\s+/).slice(0,2).map(w=>w[0]).join("").toUpperCase(),d=j.d||(j.c||"x").toLowerCase().replace(/[^a-z0-9]/g,"")+".com",src=j.lg||"https://www.google.com/s2/favicons?sz=128&domain="+encodeURIComponent(d);
  return`<div class="lg${s?" s":""}" style="background:${col(j.c)}"><span>${esc(ini)}</span><img src="${esc(src)}" alt="" onload="if(this.naturalWidth>16)this.parentNode.classList.add('ok')" onerror="this.remove()"></div>`}
 const ROCKET=`<svg class="r" viewBox="12 12 84 84" xmlns="http://www.w3.org/2000/svg"><g transform="rotate(40 54 54) translate(54 54) scale(0.96) translate(-54 -54)"><path d="M49.5,73.5C49.5,81 54,90 54,90C54,90 58.5,81 58.5,73.5Z" fill="#FFB347"/><path d="M51.8,73.5C51.8,78 54,83 54,83C54,83 56.2,78 56.2,73.5Z" fill="#FFE9A8"/><path d="M43,52C39,59 35,67 32,76L43,70Z" fill="#D9B26B"/><path d="M65,52C69,59 73,67 76,76L65,70Z" fill="#A9823F"/><path d="M54,18C61,26 66,38 65,52L65,69L43,69L43,52C42,38 47,26 54,18Z" fill="#F1F4F9"/><path d="M54,18C61,26 66,38 65,52L65,69L54,69Z" fill="#C7CEDC"/><path d="M43,60L65,60L65,63.2L43,63.2Z" fill="#D9B26B"/><path d="M48.5,69L59.5,69L57.5,73.5L50.5,73.5Z" fill="#8A93A8"/><circle cx="54" cy="43" r="5.6" fill="#D9B26B"/><circle cx="54" cy="43" r="4.2" fill="#16234A"/><circle cx="52.6" cy="41.6" r=".9" fill="#fff" opacity=".9"/></g></svg>`;
 const mini=w=>ROCKET.replace('class="r"',`class="r wob" style="width:${w}px"`);
+const cap=m=>`<div class="cap">${mini(48)}<div><b class="n">Captain A7</b><p>${m}</p></div></div>`;
+const IC={home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',jobs:'<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z"/>',dash:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',set:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',rocket:'<path d="M12 2c3 2.5 4.5 6 4 10l-2 3h-4l-2-3c-.5-4 1-7.5 4-10z"/><circle cx="12" cy="9" r="1.6"/><path d="M8 14l-3 3 3 .5M16 14l3 3-3 .5M12 17v4"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',chat:'<path d="M21 12a8 8 0 01-11.5 7.2L4 20l1-4.5A8 8 0 1121 12z"/>',user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/>',briefcase:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',cpu:'<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',sparkles:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',sun:'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>',auto:'<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>'};
+const ic=(n,s)=>`<svg width="${s||22}" height="${s||22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
+(function(){["home","jobs","dash","set"].forEach((n,i)=>{const e=$("i"+(i+1));if(e)e.innerHTML=ic(n,22)});$("gi").innerHTML=ic("set",22);
+ const el=document.createElement("div");el.id="stars";let a="",b="";for(let i=0;i<70;i++)a+=(i?",":"")+`${(Math.random()*100).toFixed(1)}vw ${(Math.random()*100).toFixed(1)}vh 0 ${Math.random()<.2?1:0}px rgba(255,255,255,${(.25+Math.random()*.6).toFixed(2)})`;for(let i=0;i<30;i++)b+=(i?",":"")+`${(Math.random()*100).toFixed(1)}vw ${(Math.random()*100).toFixed(1)}vh 0 1px rgba(214,205,255,.8)`;
+ el.innerHTML=`<i style="box-shadow:${a}"></i><i class="tw" style="box-shadow:${b}"></i>`;document.body.insertBefore(el,document.body.firstChild)})();
+
+// ---------- dialogs ----------
+function toast(m){const t=document.createElement("div");t.textContent=m;t.style.cssText="position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--card);backdrop-filter:blur(14px);border:1px solid var(--pk);color:var(--ink);padding:12px 18px;border-radius:16px;z-index:70;max-width:86%;text-align:center;font-size:.9rem";document.body.appendChild(t);setTimeout(()=>t.remove(),3600)}
+function ask(t,m,y,n,cb,cn){const o=document.createElement("div");o.className="mod";o.innerHTML=`<div class="glass"><h2>${esc(t)}</h2><p class="note" style="margin:10px 0 0;white-space:pre-wrap">${esc(m)}</p><div class="row" style="gap:10px;margin-top:16px"><button class="btn ghost sm" id="mn" style="flex:1">${esc(n)}</button><button class="btn sm" id="my" style="flex:1">${esc(y)}</button></div></div>`;document.body.appendChild(o);$("mn").onclick=()=>{o.remove();cn&&cn()};$("my").onclick=()=>{o.remove();cb&&cb()}}
+function say(t,m,b){const o=document.createElement("div");o.className="mod";o.innerHTML=`<div class="glass"><h2>${esc(t)}</h2><p class="note" style="margin:10px 0 0;white-space:pre-wrap">${esc(m)}</p><button class="btn sm" id="sy" style="margin-top:16px">${esc(b||"Got it")}</button></div>`;document.body.appendChild(o);$("sy").onclick=()=>o.remove()}
 function fx(k,cb){const e=document.createElement("div");e.className="fx "+k;e.textContent={rocket:"\u{1F680}",mail:"\u2709\uFE0F",tick:"\u2705"}[k];document.body.appendChild(e);setTimeout(()=>{e.remove();cb&&cb()},k=="rocket"?950:k=="mail"?750:600)}
-const chip=(x,on,a)=>`<button class="chip${on?" on":""}" data-a="${a}" data-v="${esc(x)}">${esc(x)}</button>`;
+const SLIDES=[["\u{1F680}","Your launch pad","Add your resume, pick roles and cities. We scan job boards and bring the best matches to you."],["\u{1F30C}","Galaxies","Each role becomes a galaxy showing jobs found and strong matches. Tap one to explore it."],["\u{1F449}","Swipe or tap","Swipe right to apply, left to skip. The buttons on each card do the same."],["\u2728","Sharper applications","Every job shows an ATS score. Tailor your resume and send an email written from your own wins."],["\u{1F4CA}","Mission Control","Track applications, follow-ups and goals on the Mission tab. Settings is in the bottom tab."]];
+function slides(i){i=i||0;const old=document.querySelector(".mod.tour");if(old)old.remove();const s=SLIDES[i],o=document.createElement("div");o.className="mod tour";o.innerHTML=`<div class="glass" style="text-align:center"><div style="font-size:3rem">${s[0]}</div><h2 style="margin-top:6px">${s[1]}</h2><p class="note" style="margin:8px 0 16px">${s[2]}</p><div class="row" style="justify-content:center;gap:6px;margin-bottom:14px">${SLIDES.map((_,k)=>`<span style="width:8px;height:8px;border-radius:50%;background:${k==i?"var(--pk)":"var(--line)"}"></span>`).join("")}</div><div class="row" style="gap:10px"><button class="btn ghost sm" id="sk2" style="flex:1">Skip</button><button class="btn sm" id="nx2" style="flex:1">${i==SLIDES.length-1?"Done":"Next"}</button></div></div>`;document.body.appendChild(o);$("sk2").onclick=()=>o.remove();$("nx2").onclick=()=>{o.remove();if(i<SLIDES.length-1)slides(i+1)}}
 function splash(){const s=document.createElement("div");s.id="sp";let st="";for(let i=0;i<40;i++)st+=`<i class="st" style="left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*1.5}s"></i>`;
  s.innerHTML=st+ROCKET+`<h1>Escape <em>Velocity</em></h1><p>by RRK</p><div class="ld"><i></i></div>`;document.body.appendChild(s);
  const end=()=>{if(!s.parentNode)return;s.style.transition="opacity .5s";s.style.opacity=0;setTimeout(()=>{s.remove();S.splash=false;render();if(DB.name&&DB.consent)userSync(true);setTimeout(askApplied,700);notifSync();if(NATIVE&&Android.pendingGo){const g=Android.pendingGo();if(g)window.__go(g)}if(NATIVE&&Android.pendingNotif){const id=Android.pendingNotif();if(id&&id!="test")window.__nid(id)}},500)};s.onclick=end;setTimeout(end,3000)}
-async function readResume(f){let t="";const n=f.name.toLowerCase();
- try{if(n.endsWith(".txt"))t=await f.text();else if(n.endsWith(".docx")){const z=await JSZip.loadAsync(f);t=(await z.file("word/document.xml").async("string")).replace(/<\/w:p>/g,"\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&")}
- else if(n.endsWith(".pdf")){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;for(let p=1;p<=Math.min(d.numPages,4);p++){const c=await(await d.getPage(p)).getTextContent();let ly=null,s="";c.items.forEach(it=>{const y=Math.round(it.transform[5]);if(ly!==null&&Math.abs(y-ly)>3)s+="\n";else if(s)s+=" ";s+=it.str;ly=y});t+=s+"\n"}}}catch(e){}
+function countdown(){return new Promise(r=>{const o=document.createElement("div");o.id="cdn";o.innerHTML=`<p>Prepare for launch</p><div class="n" id="cn">3</div>${mini(110)}`;document.body.appendChild(o);const set=t=>{const n=$("cn");n.style.animation="none";void n.offsetWidth;n.style.animation="";n.textContent=t};setTimeout(()=>set("2"),900);setTimeout(()=>set("1"),1800);setTimeout(()=>{set("\u{1F680}");o.classList.add("go")},2700);setTimeout(()=>{o.remove();r()},3600)})}
+
+// ---------- warp drive ----------
+function warp(cb){if(DB.noWarpAnim){cb();return}
+ const c=document.createElement("canvas");c.style.cssText="position:fixed;inset:0;z-index:9999;pointer-events:none";document.body.appendChild(c);
+ const x=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight,cx=W/2,cy=H/2,day=document.body.classList.contains("day-mode"),st=[],F=Math.min(W,H)*.75;
+ for(let i=0;i<650;i++)st.push({x:(Math.random()-.5)*3000,y:(Math.random()-.5)*3000,z:60+Math.random()*2200,c:Math.random()});
+ const T=2100,t0=performance.now();let last=t0,done=false;
+ (function f(t){const e=t-t0,u=Math.min(1,e/1600),v=60+Math.pow(u,3.4)*5200,dt=Math.min(.05,(t-last)/1000);last=t;
+  x.globalCompositeOperation="source-over";x.fillStyle=day?"rgba(242,245,249,.30)":"rgba(4,6,13,.30)";x.fillRect(0,0,W,H);
+  for(const s of st){const pz=s.z;s.z-=v*dt;if(s.z<=25){s.x=(Math.random()-.5)*3000;s.y=(Math.random()-.5)*3000;s.z=2260;continue}
+   const k=F/s.z,k0=F/(s.z+v*dt*1.6),X=cx+s.x*k,Y=cy+s.y*k,X0=cx+s.x*k0,Y0=cy+s.y*k0,d=1-s.z/2260;
+   x.strokeStyle=day?`rgba(70,80,130,${.25+d*.7})`:(s.c<.2?`rgba(214,176,106,${.3+d*.7})`:`rgba(235,240,255,${.3+d*.7})`);x.lineWidth=Math.min(3.6,.4+d*3.4);x.beginPath();x.moveTo(X0,Y0);x.lineTo(X,Y);x.stroke()}
+  if(e>1350){const a=Math.min(1,(e-1350)/650),g=x.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.75*a+1);g.addColorStop(0,`rgba(255,246,222,${.95*a})`);g.addColorStop(.5,`rgba(214,176,106,${.5*a})`);g.addColorStop(1,"rgba(214,176,106,0)");x.fillStyle=g;x.fillRect(0,0,W,H)}
+  if(e<T)requestAnimationFrame(f);else if(!done){done=true;cb();c.style.transition="opacity .45s";c.style.opacity="0";setTimeout(()=>c.remove(),480)}})(t0)}
+
+// ---------- resume ----------
+async function readResume(f){let t="";const n=f.name.toLowerCase();DB.rfmt=n.endsWith(".docx")?"docx":n.endsWith(".pdf")?"pdf":"txt";cfg("rdoc","");
+ try{if(n.endsWith(".txt"))t=await f.text();
+  else if(n.endsWith(".docx")){const buf=await f.arrayBuffer(),z=await JSZip.loadAsync(buf);t=(await z.file("word/document.xml").async("string")).replace(/<\/w:p>/g,"\n").replace(/<[^>]+>/g,"").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">");
+   if(buf.byteLength<1500000){let b="";const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=8192)b+=String.fromCharCode.apply(null,u.subarray(i,i+8192));cfg("rdoc",btoa(b))}}
+  else if(n.endsWith(".pdf")){pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;for(let p=1;p<=Math.min(d.numPages,4);p++){const c=await(await d.getPage(p)).getTextContent();let ly=null,s="";c.items.forEach(it=>{const y=Math.round(it.transform[5]);if(ly!==null&&Math.abs(y-ly)>3)s+="\n";else if(s)s+=" ";s+=it.str;ly=y});t+=s+"\n"}}}catch(e){}
  DB.rt=t.trim();DB.rname=f.name;if(NATIVE){const r=new FileReader();r.onload=()=>Android.saveResume(f.name,String(r.result).split(",")[1]);r.readAsDataURL(f)}save()}
+function normResume(t){t=(t||"").replace(/\r/g,"");let L=t.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(L.length<12||L.some(x=>x.length>420)){t=t.replace(/\s*[\u2022\u25AA\u25CF\u25E6\u2023]\s*/g,"\n").replace(/\s{3,}/g,"\n").replace(/([.!?])\s+(?=[A-Z])/g,"$1\n");L=t.split(/\n+/).map(x=>x.trim()).filter(Boolean)}
+ const out=[];L.forEach(l=>{const p=out[out.length-1];if(p&&!/[.!?:;]$/.test(p)&&/^[a-z(]/.test(l))out[out.length-1]=p+" "+l;else out.push(l)});return out.join("\n")}
+const resumeLines=()=>normResume(DB.rt).split("\n").map(x=>x.replace(/^[\s\u2022*\-]+/,"").replace(/\s+/g," ").trim()).filter(x=>x.length>25&&x.length<340);
+const yearsOf=()=>{const m=(DB.rt||"").match(/(\d+(?:\.\d+)?)\s*\+?\s*years/i);return m?m[1]:""};
 const allRoles=()=>[...new Set([...MASTER,...DB.custom])];
 const gen=new Set(["manager","senior","lead","head","associate","executive","specialist","analyst","officer","assistant"]);
-const rk=r=>{const w=r.toLowerCase().split(/[^a-z0-9+#]+/).filter(x=>x.length>2&&!gen.has(x));return w.length?w:[r.toLowerCase()]};
+const rk=r=>{const w=(r||"").toLowerCase().split(/[^a-z0-9+#]+/).filter(x=>x.length>2&&!gen.has(x));return w.length?w:[(r||"").toLowerCase()]};
 function rscore(r){const t=DB.rt.toLowerCase();if(!t)return 0;let s=t.includes(r.toLowerCase())?3:0;rk(r).forEach(w=>{if(t.includes(w))s++});return s}
 const roleOk=j=>{const t=(j.t||"").toLowerCase();return !DB.roles.length||DB.roles.some(r=>rk(r).some(w=>t.includes(w)))};
 const locOk=l=>{if(!DB.locs.length||DB.locs.includes("Anywhere"))return true;l=(l||"").toLowerCase();return DB.locs.some(x=>(AL[x]||[x.toLowerCase()]).some(a=>l.includes(a)))||l==="india"||l===""};
+
+// ---------- job search ----------
 const A="https://api.apify.com/v2/acts/",city=l=>l.split(",")[0];
 const SRC=[{n:"LinkedIn",a:"curious_coder~linkedin-jobs-scraper",q:1,i:(r,l)=>({keywords:r,location:l,datePosted:"pastMonth",limitPerSource:12,scrapeCompany:false})},
 {n:"LinkedIn",a:"cheap_scraper~linkedin-job-scraper",i:(r,l)=>({keyword:r,keywords:r,searchTerms:[r],location:l,maxItems:12,limit:12})},
@@ -283,6 +268,8 @@ async function search(){if(!cfg("apify")){S.note="Add your search key in Setting
  const fresh=queue().filter(j=>j.sc==null).slice(0,30);
  if(fresh.length&&aiOn()){S.load="Flight-checking jobs against your resume...";render();try{const r=await ai(ENR,"RESUME:\n"+DB.rt.slice(0,2800)+"\n\nJOBS:\n"+fresh.map(j=>`id:${j.id} | ${j.t} | ${j.c} | ${j.jd.slice(0,420)}`).join("\n"));
   (r.jobs||[]).forEach(a=>{const j=DB.jobs[String(a.id)];if(j){j.sc=a.score;j.b=a.bullets;j.d=a.domain;j.about=a.about}});save()}catch(e){}}}
+
+// ---------- ATS ----------
 const STOP=new Set("the and for with that this you your are will our from have has can all not but who they their was been more other into out about over such per via etc able also use using work working role team teams join looking candidate candidates experience years year skills strong good ability required requirements responsibilities responsible job description company must plus including within across new its them than any one two may well need needs both each what when where which while these those apply".split(" "));
 const SK=["seo","sem","sql","excel","tableau","power bi","crm","gtm","roi","kpi","p&l","ga4","google ads","meta ads","a/b testing","analytics","campaign","brand strategy","positioning","stakeholder","agency","budget","forecasting","launch","influencer","social media","content","performance marketing","market research","consumer insights","e-commerce","retail","category management","trade marketing","pricing","vendor","negotiation","cross-functional","leadership","product marketing","go-to-market","customer acquisition","retention","lifecycle","segmentation","dashboard","python","automation","communication","presentation"];
 function ats(j){const r=(DB.rt||"").toLowerCase(),jd=(j.jd||"").toLowerCase();if(r.length<80||jd.length<60)return null;
@@ -292,116 +279,146 @@ function ats(j){const r=(DB.rt||"").toLowerCase(),jd=(j.jd||"").toLowerCase();if
  const secs=["experience","education","skills"].filter(s=>r.includes(s)).length,nums=(r.match(/\d+%?/g)||[]).length,w=r.split(/\s+/).length;
  const P=[{n:"Keyword match",s:top.length?hit.length/top.length*40:20,m:40},{n:"Skills and tools",s:sk.length?sh.length/sk.length*20:14,m:20},{n:"Title alignment",s:tw.length?th.length/tw.length*15:10,m:15},{n:"Experience fit",s:need?Math.min(1,have/need)*15:11,m:15},{n:"Resume health",s:secs/3*4+Math.min(1,nums/10)*3+(w>200&&w<1500?2:1)+(/@/.test(r)?1:0),m:10}];
  return{tot:Math.round(P.reduce((a,x)=>a+x.s,0)),P,hit,miss,need,have}}
-function tpl(j){const co=j.c?" at "+j.c:"";return{subject:`${j.t} | ${j.c||"Application"} | ${DB.name}`,body:`tldr;\n\nI would love to be considered for the ${j.t} role${co}.\n\nHi,\n\nI came across the ${j.t} opening${co} and wanted to reach out directly. I am ${DB.name} and I work in ${DB.roles.join(" / ")} roles.\n\nMy resume is attached and I would be glad to talk whenever it suits you.\n\nBest,\n${DB.name}\n${DB.email}`}}
-const NN=/\d/;
-function normResume(t){t=(t||"").replace(/\r/g,"");let L=t.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(L.length<12||L.some(x=>x.length>420)){t=t.replace(/\s*[\u2022\u25AA\u25CF\u25E6\u2023]\s*/g,"\n").replace(/\s{3,}/g,"\n").replace(/([.!?])\s+(?=[A-Z])/g,"$1\n");L=t.split(/\n+/).map(x=>x.trim()).filter(Boolean)}return L.join("\n")}
-const resumeLines=()=>normResume(DB.rt).split("\n").map(x=>x.replace(/^[\s\u2022*\-]+/,"").replace(/\s+/g," ").trim()).filter(x=>x.length>25&&x.length<340);
-const yearsOf=()=>{const m=(DB.rt||"").match(/(\d+(?:\.\d+)?)\s*\+?\s*years/i);return m?m[1]:""};
-function pickLines(j,n){const set=new Set(((j.jd||"")+" "+(j.t||"")).toLowerCase().match(/[a-z][a-z+#&\/.-]{3,}/g)||[]);STOP.forEach(w=>set.delete(w));
- return resumeLines().filter(l=>NN.test(l)).map(l=>[l,(l.toLowerCase().match(/[a-z][a-z+#&\/.-]{3,}/g)||[]).filter(w=>set.has(w)).length+(/%|cr\b|bn\b|yoy|x\b/i.test(l)?1:0)]).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0])}
-function compose(j){const co=j.c||"your team",y=yearsOf(),sm=resumeLines().find(x=>/\d+(?:\.\d+)?\s*\+?\s*years/i.test(x)),bl=pickLines(j,3).map(x=>"- "+x.replace(/[.;]$/,"")+".").join("\n");
- const first=sm?sm.split(/(?<=\.)\s/)[0].replace(/[.;]$/,""):`${y?y+" years of experience in ":""}${DB.roles[0]||"this field"}`;
- return{subject:`${j.t} | ${j.c||"Application"} | ${DB.name}${y?", "+y+" yrs":""}`,body:`tldr;\n\n${first}. I would love to be considered for the ${j.t} role at ${co}.\n\nHi,\n\nI came across the ${j.t} opening at ${co} and wanted to reach out directly.${y?" I have "+y+" years of experience.":""} Here is what I would bring to this role:\n\n${bl||"- Hands-on experience that lines up with the role requirements."}\n\nI would love to be part of the ${co} team. My resume is attached, and I am happy to talk whenever it suits you.\n\nBest,\n${DB.name}\n${DB.email}${DB.phone?" | "+DB.phone:""}`}}
+
+// ---------- email phraser ----------
+const GER={leading:"led",managing:"managed",driving:"drove",building:"built",developing:"developed",owning:"owned",launching:"launched",delivering:"delivered",increasing:"increased",growing:"grew",creating:"created",executing:"executed",designing:"designed",optimizing:"optimized",optimising:"optimised",improving:"improved",scaling:"scaled",generating:"generated",achieving:"achieved",reducing:"reduced",implementing:"implemented",establishing:"established",negotiating:"negotiated",coordinating:"coordinated",spearheading:"spearheaded",handling:"handled",running:"ran",winning:"won",securing:"secured",lifting:"lifted",expanding:"expanded",boosting:"boosted",building:"built",working:"worked"};
+const VERB=/^(led|managed|built|launched|drove|increased|grew|reduced|cut|developed|created|designed|executed|owned|delivered|improved|scaled|generated|achieved|optimi[sz]ed|won|earned|secured|negotiated|implemented|streamlined|established|spearheaded|initiated|transformed|accelerated|boosted|lifted|expanded|handled|coordinated|collaborated|ran|saved|doubled|tripled|authored|piloted|pioneered|rebuilt|redesigned|mentored|trained|conducted|analy[sz]ed|identified|negotiated|reached|surpassed|exceeded|\w+ing)\b/i;
+const DATE_RX=/((jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*\d{4}|\b(19|20)\d{2}\b)\s*(-|\u2013|\u2014|to)\s*(present|current|((jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s*)?\d{4})/i;
+const isWin=l=>!DATE_RX.test(l)&&/\d/.test(l)&&VERB.test(l)&&l.split(" ").length>=6;
+function winScore(l,set){return(l.toLowerCase().match(/[a-z][a-z+#&\/.-]{3,}/g)||[]).filter(w=>set.has(w)).length+(/%/.test(l)?3:0)+(/\bcr\b|\bbn\b|yoy|\d{2,}/i.test(l)?2:0)}
+function pickWins(j,n){const set=new Set(((j.jd||"")+" "+(j.t||"")).toLowerCase().match(/[a-z][a-z+#&\/.-]{3,}/g)||[]);STOP.forEach(w=>set.delete(w));const seen=new Set();
+ return resumeLines().filter(isWin).map(l=>[l,winScore(l,set)]).sort((a,b)=>b[1]-a[1]).map(x=>x[0]).filter(l=>{const k=l.slice(0,24).toLowerCase();if(seen.has(k))return false;seen.add(k);return true}).slice(0,n)}
+function firstPerson(l){l=l.replace(/\s+/g," ").replace(/[.;,]+$/,"").trim();const w=l.split(" "),g=GER[w[0].toLowerCase()];w[0]=g||(w[0].charAt(0).toLowerCase()+w[0].slice(1));let s=w.join(" ");if(w.length>26)s=w.slice(0,26).join(" ").replace(/[,;(&]+$/,"");return"I "+s+"."}
+const cutAt=s=>s.split(/\s(?:through|across|via|using|while|by (?:doing|leading|building|running|executing))\s/i)[0];
+function recruiterFirst(j){const bad=/^(careers?|hr|jobs?|talent|info|hello|contact|recruit\w*|hiring|team|admin|support|resume|cv|apply|mail|sales)$/i;if(j.m){const l=j.m.split("@")[0].split(/[._-]/)[0];if(/^[a-z]{3,12}$/i.test(l)&&!bad.test(l))return l.charAt(0).toUpperCase()+l.slice(1).toLowerCase()}if(j.pn){const f=j.pn.split(" ")[0];if(/^[A-Za-z]{2,14}$/.test(f))return f}return"Hiring Team"}
+function sharedKw(j,n){const jd=(j.jd||"").toLowerCase(),r=(DB.rt||"").toLowerCase();return SK.filter(s=>s.length>3&&jd.includes(s)&&r.includes(s)).slice(0,n)}
+function fieldOf(role){let t=(role||"").toLowerCase().replace(/\b(senior|junior|associate|assistant|lead|head of|vp|chief)\b/g,"").trim();if(/manager$/.test(t))t=t.replace(/\s*manager$/,"")+" management";else t=t.replace(/\s*(executive|specialist|analyst|officer)$/,"");return t.replace(/\s+/g," ").trim()||"my field"}
+function headline(w){const t=firstPerson(w).replace(/^I /,"").replace(/\.$/,"").split(" ");let k=-1;t.slice(0,16).forEach((x,i)=>{if(/%|\d(cr|bn|m|k|x)\b/i.test(x))k=i});if(k<0)t.slice(0,16).forEach((x,i)=>{if(/\d/.test(x)&&k<0)k=i});return(k>=0?t.slice(0,k+1):t.slice(0,12)).join(" ")}
+function tpl(j){const co=j.c||"your team";return{subject:`${j.t} | ${j.c||"Application"} | ${DB.name}`,body:`tldr;\n\n${DB.name} would love to be considered for the ${j.t} role at ${co}.\n\nHi ${recruiterFirst(j)},\n\nI came across the ${j.t} opening at ${co} and wanted to reach out directly. My background is in ${(DB.roles[0]||"this field").toLowerCase()}.\n\nMy resume is attached and I would be glad to talk whenever it suits you.\n\nBest,\n${DB.name}\n${DB.email}`}}
+function compose(j){const co=j.c||"your team",y=yearsOf(),field=fieldOf(j.t||DB.roles[0]),wins=pickWins(j,3),kws=sharedKw(j,2),first=recruiterFirst(j);
+ const hl=wins[0]?headline(wins.find(w=>/%/.test(w)&&/\b(increased|grew|cut|reduced|lifted|boosted|doubled|saved|generated|drove)\b/i.test(w))||wins.find(w=>/%/.test(w))||wins[0]):"";
+ const tldr=`${DB.name}: ${y?y+" years in ":""}${field}${hl?", with results like "+hl:""}. Keen to be considered for the ${j.t} role at ${co}.`;
+ const intro=`I came across the ${j.t} opening at ${co} and wanted to reach out directly. ${y?`I bring ${y} years of experience in ${field}`:`My background is in ${field}`}${kws.length?`, with hands-on work in ${kws.join(" and ")}`:""}.`;
+ const bl=wins.length?"\n\nHere is what I would bring to the role:\n"+wins.map(w=>"\u2022 "+firstPerson(w)).join("\n"):"";
+ const close=`I would love to be part of the ${co} team${kws[0]?" and contribute to your "+kws[0]+" work":""}. My resume is attached, and I am happy to speak whenever it suits you.`;
+ return{subject:`${j.t} | ${j.c||"Application"} | ${DB.name}${y?", "+y+" yrs":""}`,body:`tldr; ${tldr}\n\nHi ${first},\n\n${intro}${bl}\n\n${close}\n\nBest,\n${DB.name}\n${[DB.phone,DB.email].filter(Boolean).join(" | ")}`}}
 async function draft(j){const base=DB.rt?compose(j):tpl(j);S.by="Smart composer";if(!aiOn()||!DB.rt)return base;
- try{const r=await ai(EML+" Improve this draft but keep every number exactly as in the resume.",`CANDIDATE: ${DB.name}, ${DB.email}\nRESUME:\n${DB.rt.slice(0,3500)}\n\nJOB: ${j.t} at ${j.c}, ${j.l}\nJOB DESCRIPTION:\n${j.jd}\n\nBASE DRAFT TO IMPROVE:\n${base.body}`);
-  if(r&&r.body&&String(r.body).length>120){S.by="AI";return{subject:r.subject||base.subject,body:String(r.body)}}}catch(e){S.aierr=e.message}return base}
+ try{const r=await wto(ai(EML,`JOB: ${j.t} at ${j.c}\nDRAFT SUBJECT: ${base.subject}\nDRAFT BODY:\n${base.body}`),30000);
+  if(r&&r.body&&String(r.body).length>120&&/tldr/i.test(r.body)&&String(r.body).includes(DB.name)){S.by="AI polish";return{subject:r.subject||base.subject,body:String(r.body)}}}catch(e){}return base}
 const sendMail=(j,d)=>{if(NATIVE){if(j.tl&&Android.mailFile)Android.mailFile(j.m||"",d.subject,d.body,j.tl.name,j.tl.b64);else Android.mail(j.m||"",d.subject,d.body)}else window.open("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(j.m||"")+"&su="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body),"_blank")};
-const openU=u=>NATIVE?Android.openUrl(u):window.open(u,"_blank");
+
+// ---------- resume tailoring ----------
+const KWSKIP=new Set("brand leader manager senior role ability strong excellent knowledge understanding responsible including candidate looking join working years experience required preferred team business company work".split(" "));
+function missKw(j,a){const jd=(j.jd||"").toLowerCase(),rt=(DB.rt||"").toLowerCase(),sk=SK.filter(s=>jd.includes(s)&&!rt.includes(s)),ex=(a?a.miss:[]).filter(w=>w.length>4&&!KWSKIP.has(w)&&!sk.includes(w));return[...sk,...ex].slice(0,8)}
+function lineFor(lines,kw,j,used){const jd=(j.jd||"").toLowerCase(),i=jd.indexOf(kw),ctx=new Set(jd.slice(Math.max(0,i-90),i+90).match(/[a-z]{4,}/g)||[]);let pool=lines.filter(l=>!used.has(l)&&isWin(l));if(!pool.length&&!lines.some(isWin))pool=lines.filter(l=>!used.has(l)&&!DATE_RX.test(l)&&l.length>50&&!/years of experience/i.test(l));let best=null,bs=-1;pool.forEach(l=>{const s=(l.toLowerCase().match(/[a-z]{4,}/g)||[]).filter(x=>ctx.has(x)).length+(/%|\bcr\b|\bbn\b|\d{2,}/i.test(l)?3:0);if(s>bs){bs=s;best=l}});return best}
+function bestMatch(lines,old){const o=old.toLowerCase().replace(/\s+/g," ").trim();let best=null,bs=0;lines.forEach(l=>{const ll=l.toLowerCase();if(ll==o||ll.includes(o.slice(0,30))||o.includes(ll.slice(0,30))){bs=99;best=l;return}const w=new Set(ll.match(/[a-z]{4,}/g)||[]),ow=o.match(/[a-z]{4,}/g)||[],s=ow.filter(x=>w.has(x)).length/Math.max(1,ow.length);if(s>bs&&s>.6){bs=s;best=l}});return best}
+async function tailor(j){const a=ats(j);if(!a)throw new Error("Resume text not found. Re-upload your resume in Settings.");const kws=missKw(j,a);if(!kws.length)throw new Error("Your resume already covers this job's keywords");const lines=resumeLines();if(!lines.length)throw new Error("Resume text not found. Re-upload your resume in Settings.");let ch=[],mode="AI";
+ if(aiOn()){try{const wins=lines.filter(isWin).slice(0,40),r=await wto(ai(TLR,`MISSING KEYWORDS: ${kws.join(", ")}\nJOB TITLE: ${j.t}\nJOB CONTEXT: ${(j.jd||"").slice(0,900)}\nRESUME ACHIEVEMENT LINES:\n${wins.join("\n")}`),40000);(r.changes||[]).forEach(c=>{if(!c.new||!c.old)return;const o=bestMatch(wins,String(c.old));if(o&&!ch.some(x=>x.old==o))ch.push({old:o,new:String(c.new).trim(),kw:c.kw||""})})}catch(e){}}
+ if(!ch.length){mode="basic";const used=new Set();kws.slice(0,5).forEach(k=>{const l=lineFor(lines,k,j,used);if(l&&!ch.some(c=>c.old==l)){used.add(l);ch.push({old:l,new:l.replace(/[.;]$/,"")+", using "+k+".",kw:k,basic:true})}})}
+ return{ch,mode}}
+function applyChanges(t,ch){const L=t.split("\n");ch.forEach(c=>{const k=String(c.old).slice(0,40),i=L.findIndex(l=>l.includes(k));if(i>=0)L[i]=L[i].replace(/^([\s\u2022*\-]*).*$/,(m,b)=>b+c.new)});return L.join("\n")}
+const nz=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,"");
+async function patchDocx(b64,ch){const z=await JSZip.loadAsync(b64,{base64:true}),xml=await z.file("word/document.xml").async("string"),doc=new DOMParser().parseFromString(xml,"application/xml"),W="http://schemas.openxmlformats.org/wordprocessingml/2006/main",ps=[...doc.getElementsByTagNameNS(W,"p")];let n=0;
+ ch.forEach(c=>{const key=nz(c.old).slice(0,38);for(const p of ps){const ts=[...p.getElementsByTagNameNS(W,"t")];if(!ts.length)continue;if(nz(ts.map(t=>t.textContent).join("")).includes(key)){ts[0].textContent=c.new;ts[0].setAttribute("xml:space","preserve");for(let i=1;i<ts.length;i++)ts[i].textContent="";n++;break}}});
+ z.file("word/document.xml",new XMLSerializer().serializeToString(doc));return{b64:await z.generateAsync({type:"base64"}),n}}
+async function makeDocx(t){const z=new JSZip(),x=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+ z.file("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
+ z.file("_rels/.rels",'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+ z.file("word/document.xml",'<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+t.split("\n").map(l=>`<w:p><w:r><w:t xml:space="preserve">${x(l)}</w:t></w:r></w:p>`).join("")+'</w:body></w:document>');return await z.generateAsync({type:"base64"})}
+async function makePdf(t){const J=window.jspdf&&window.jspdf.jsPDF;if(!J)throw new Error("the PDF engine is offline");const d=new J({unit:"pt",format:"a4"}),W=d.internal.pageSize.getWidth()-80,H=d.internal.pageSize.getHeight()-60;let y=50;
+ t.replace(/\u20B9/g,"Rs ").replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,"-").replace(/[^\x09\x0A\x20-\xFF]/g,"").split("\n").forEach(l=>{const head=l.length<46&&l===l.toUpperCase()&&/[A-Z]/.test(l);d.setFont("helvetica",head?"bold":"normal");d.setFontSize(head?12:10);d.splitTextToSize(l,W).forEach(x=>{if(y>H){d.addPage();y=50}d.text(x,40,y);y+=head?17:13.5});if(head)y+=2});
+ return d.output("datauristring").split(",")[1]}
+async function buildResume(ch,j){const base=(DB.name||"Resume").replace(/\s+/g,"_")+"_Resume_"+(j.c||"job").replace(/[^A-Za-z0-9]+/g,"_"),rdoc=cfg("rdoc"),out={};
+ if(DB.rfmt=="docx"&&rdoc){try{const r=await patchDocx(rdoc,ch);if(r.n){out.primary={name:base+".docx",b64:r.b64};out.kept=true}}catch(e){}}
+ if(!out.primary){const txt=applyChanges(normResume(DB.rt),ch);out.docx={name:base+".docx",b64:await makeDocx(txt)};try{out.pdf={name:base+".pdf",b64:await makePdf(txt)}}catch(e){}out.primary=DB.rfmt=="pdf"&&out.pdf?out.pdf:out.docx}
+ return out}
+
+// ---------- referrals ----------
+const AGENCY=/recruit|staffing|consult|talent|placement|manpower|headhunt|hr (services|solutions)|executive search|outsourc|payroll|search firm/i;
+const isAgency=j=>AGENCY.test(j.c||"");
+const FN=[[/brand|market|growth|content|seo|social|digital|crm|communication|campaign|performance|category/i,"15"],[/sales|business develop|key account|channel/i,"25"],[/product|program/i,"19"],[/engineer|developer|software|devops|qa\b|android|data scien/i,"8"],[/financ|audit|investment|account/i,"10"],[/\bhr\b|talent|people/i,"12"],[/operation|supply|logistic|procure/i,"18"],[/design|creative/i,"3"],[/analyst|analytics|research/i,"24"]];
+const fnOf=t=>{for(const [r,i] of FN)if(r.test(t||""))return i;return""};
+const vk=t=>rk(t||"").slice(0,2).join(" ");
+const locOf=p=>{const l=p.location;return typeof l=="string"?l:(l&&(l.linkedinText||l.text||(l.parsed&&l.parsed.text)))||""};
+const person=p=>({n:((p.firstName||"")+" "+(p.lastName||"")).trim()||p.name||"",h:p.headline||p.position||((p.currentPosition||[])[0]||{}).position||"",u:p.linkedinUrl,c:((p.currentPosition||[])[0]||{}).companyName||"",loc:locOf(p)});
+function locHit(p){const t=((p.loc||"")+" "+(p.h||"")).toLowerCase(),cities=DB.locs.filter(x=>!["Anywhere","Remote"].includes(x)).flatMap(x=>AL[x]||[x.toLowerCase()]);return/india/.test(t)||cities.some(c=>c&&t.includes(c))}
+function rank(list,j){const tk=rk(j.t||"");return list.map(p=>{const hh=(p.h||"").toLowerCase();let s=0;tk.forEach(w=>{if(hh.includes(w))s+=3});if(/manager|lead|head|director|vp|chief|senior/.test(hh))s+=1;if(/recruit|talent|\bhr\b|human resources/.test(hh))s-=2;if(AGENCY.test(hh))s-=4;const inC=locHit(p);if(inC)s+=6;return{...p,s,out:!inC}}).sort((a,b)=>b.s-a.s)}
+function parseG(items,j){const tok=(j.c||"").toLowerCase().split(/\s+/)[0],out=[],seen=new Set();(items||[]).forEach(it=>{(it.organicResults||[it]).forEach(r=>{const u=String(r.url||"").split("?")[0];if(!/linkedin\.com\/in\//i.test(u)||seen.has(u))return;const raw=String(r.title||"").replace(/\s*[|\u2013-]\s*LinkedIn.*$/i,""),parts=raw.split(/\s[-\u2013\u2014]\s/),n=(parts[0]||"").trim(),hl=(parts.slice(1).join(" - ")||String(r.description||"").slice(0,100)).trim(),blob=(raw+" "+(r.description||"")).toLowerCase();if(!n||n.split(/\s+/).length>5||(tok&&!blob.includes(tok)))return;seen.add(u);out.push({n,h:hl,u,c:hl,loc:String(r.description||"")})})});return out}
+const coSlug=j=>(j.c||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const coUrl=j=>j.cu&&/linkedin\.com\/company/.test(j.cu)?j.cu.split("?")[0].replace(/\/$/,""):"https://www.linkedin.com/company/"+coSlug(j);
+async function fetchPeople(j,wide){const co=(j.c||"").replace(/["']/g,""),url=coUrl(j),fid=fnOf(j.t),vq=vk(j.t),mi=wide?30:15,base={maxItems:mi,profileScraperMode:"Short ($4 per 1k)"},
+ act=(a,inp,to)=>req(A+a+"/run-sync-get-dataset-items?timeout="+(to||100)+"&token="+encodeURIComponent(cfg("apify")),"POST",JSON.stringify(inp)).then(t=>{const x=JSON.parse(t);return Array.isArray(x)?x:[]});
+ const all=[],add=l=>{const have=new Set(all.map(x=>x.u));l.forEach(x=>{if(!have.has(x.u)){all.push(x);have.add(x.u)}})};
+ try{const q=wide?`site:linkedin.com/in "${co}" manager OR lead OR head OR director OR senior`:`site:linkedin.com/in "${co}" ${vq} India\nsite:linkedin.com/in "${co}" ${(j.t||"").split(/\s+/).slice(0,3).join(" ")}`;add(parseG(await act("apify~google-search-scraper",{queries:q,maxPagesPerQuery:wide?2:1,resultsPerPage:10,countryCode:"in",languageCode:"en"},80),j))}catch(e){}
+ if(all.length<6){const tries=wide?[{companies:[url],...base}]:[{companies:[url],...(fid?{functionIds:[fid]}:{}),...base},{companies:[url],searchQuery:vq,...base},{companies:[url],...base}];
+  for(const inp of tries){try{const r=(await act("harvestapi~linkedin-company-employees",inp)).filter(x=>x&&x.linkedinUrl).map(person);if(r.length){add(r);break}}catch(e){}}}
+ if(all.length<3){try{const nm=co.toLowerCase().split(/\s+/)[0],r=(await act("harvestapi~linkedin-profile-search",{searchQuery:vq+" "+co,maxItems:mi,profileScraperMode:"Short ($4 per 1k)"})).filter(x=>x&&x.linkedinUrl).map(person).filter(x=>nm&&((x.c||"").toLowerCase().includes(nm)||(x.h||"").toLowerCase().includes(nm)));add(r)}catch(e){}}
+ return all}
+const lkCompany=j=>coUrl(j)+"/people/?keywords="+encodeURIComponent(vk(j.t));
+const lkRole=j=>"https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(vk(j.t)+" "+(j.c||""));
+const posterCard=j=>j.pu?`<div class="app"><div class="lg s" style="background:${col(j.pn)}"><span>${esc((j.pn||"?")[0])}</span></div><div><b>${esc(j.pn||"Job poster")}</b><div class="co">Posted this job</div></div><div class="x"><button class="btn sm" data-a="open" data-v="${esc(j.pu)}">Connect</button><button class="btn sm ghost" data-a="msg" data-v="${esc(j.pn||"there")}">Copy intro</button></div></div>`:"";
+const refBox=j=>{
+ if(isAgency(j)&&!DB.agencyContacts)return`<p class="note">${esc(j.c)} looks like a recruitment or consulting firm, so I only show the person who posted this job.</p>`+(posterCard(j)||'<p class="note">No poster profile came with this job.</p>');
+ const find=`<button class="btn ghost sm" style="margin-top:10px" data-a="open" data-v="${esc(lkCompany(j))}">View ${esc(j.c||"company")} employees on LinkedIn</button><button class="btn ghost sm" style="margin-top:8px" data-a="open" data-v="${esc(lkRole(j))}">Search by role</button>`;
+ if(!j.pool)return(posterCard(j))+`<p class="note" style="margin-top:8px">Find people at ${esc(j.c||"this company")}. People in your country come first.</p><button class="btn ghost sm" data-a="refs">Find referral contacts</button>`+find;
+ const sh=j.pool.slice(0,j.rs||3);return posterCard(j)+(sh.length?sh.map(x=>`<div class="app"><div class="lg s" style="background:${col(x.n)}"><span>${esc((x.n||"?")[0])}</span></div><div><b>${esc(x.n)}</b><div class="co">${esc(x.h)}${x.out?" \u00b7 outside your region":""}</div></div><div class="x"><button class="btn sm" data-a="open" data-v="${esc(x.u)}">Connect</button><button class="btn sm ghost" data-a="msg" data-v="${esc(x.n)}">Copy intro</button></div></div>`).join(""):'<p class="note">I could not pull names this time. The company link below opens only that company\'s employees.</p>')+`<button class="btn ghost sm" style="margin-top:10px" data-a="more">${(j.rs||3)<j.pool.length?"Search for more":"Search wider"}</button>`+find};
+
+// ---------- tracking + notifications ----------
 const HOOK=(window.EV_CFG&&window.EV_CFG.hook)||"",KEY="rrk-ev-2026";
 const DEV=(()=>{try{return NATIVE?JSON.parse(Android.deviceInfo()):{model:navigator.userAgent.slice(0,60)}}catch(e){return{}}})();
-const cap=m=>`<div class="cap">${mini(48)}<div><b class="n">Captain A7</b><p>${m}</p></div></div>`;
 const snap=()=>{const J=Object.values(DB.jobs);return{name:DB.name,phone:DB.phone,...DEV,roles:DB.roles.join("; "),locs:DB.locs.join("; "),resume:DB.rname,found:J.length,applied:J.filter(j=>["applied","int","offer","rej"].includes(j.st)).length,int:J.filter(j=>j.st=="int").length,offer:J.filter(j=>j.st=="offer").length,ai:cfg("llm")||"free",consent:DB.consent}};
 function q(o){if(!HOOK||!DB.consent)return;DB.out.push(o);if(DB.out.length>300)DB.out.shift();save();flush()}
 const track=(ev,detail)=>q({t:"ev",ev,detail:String(detail||"")});
 const userSync=s=>q({t:"user",session:s?1:0,...snap()});
 const appSync=j=>q({t:"app",id:j.id,company:j.c,title:j.t,loc:j.l,source:j.s,link:j.u,status:j.st,at:j.ap||Date.now(),ats:j.ats||"",match:j.sc||""});
 let fl=false;async function flush(){if(fl||!HOOK||!DB.consent)return;fl=true;try{while(DB.out.length){await req(HOOK,"POST",JSON.stringify({...DB.out[0],k:KEY,email:DB.email,ver:VER,model:DEV.model}));DB.out.shift();save()}}catch(e){}fl=false}
-function ask(t,m,y,n,cb,cn){const o=document.createElement("div");o.className="mod";o.innerHTML=`<div class="glass"><h2>${esc(t)}</h2><p class="note" style="margin:10px 0 0">${esc(m)}</p><div class="row" style="gap:10px;margin-top:16px"><button class="btn ghost sm" id="mn" style="flex:1">${esc(n)}</button><button class="btn sm" id="my" style="flex:1">${esc(y)}</button></div></div>`;document.body.appendChild(o);$("mn").onclick=()=>{o.remove();cn&&cn()};$("my").onclick=()=>{o.remove();cb&&cb()}}
-function countdown(){return new Promise(r=>{const o=document.createElement("div");o.id="cdn";o.innerHTML=`<p>Prepare for launch</p><div class="n" id="cn">3</div>${mini(110)}`;document.body.appendChild(o);const set=t=>{const n=$("cn");n.style.animation="none";void n.offsetWidth;n.style.animation="";n.textContent=t};setTimeout(()=>set("2"),900);setTimeout(()=>set("1"),1800);setTimeout(()=>{set("\u{1F680}");o.classList.add("go")},2700);setTimeout(()=>{o.remove();r()},3600)})}
+const unread=()=>(DB.inbox||[]).filter(n=>!n.o).length;
+function updBell(){const b=$("bl"),n=unread();b.style.display=DB.name&&DB.consent&&!S.load&&!S.splash?"block":"none";b.innerHTML=ic("bell",22)+(n?`<i class="badge">${n>9?"9+":n}</i>`:"")}
+const hq=a=>HOOK+"?a="+a+"&k="+encodeURIComponent(KEY)+"&email="+encodeURIComponent(DB.email);
+async function notifSync(){if(!HOOK||!DB.consent||!DB.email)return;try{if(NATIVE&&Android.setNotif)Android.setNotif(HOOK,DB.email,KEY);const a=JSON.parse(await req(hq("inbox"),"GET"));if(Array.isArray(a)){a.forEach(x=>{if(!x.dv&&NATIVE&&Android.showNotif)Android.showNotif(String(x.id),x.title||"",x.msg||"",x.cta||"",x.ct||"")});DB.inbox=a.slice(0,30);save();updBell();if(S.v=="home")homeV();if($("bp")){$("bp").remove();bellPanel()}}}catch(e){}}
+function ctaGo(t){t=String(t||"").trim();if(/^https?:/.test(t))openU(t);else if(["home","jobs","dash","set"].includes(t)){S.v=t;S.edit=false;render()}}
+function nopen(id){const n=(DB.inbox||[]).find(x=>String(x.id)==String(id));if(!n)return;if(!n.o){n.o=1;save();updBell();if(HOOK)req(hq("opened")+"&id="+encodeURIComponent(id),"GET").catch(()=>{})}
+ const bp=$("bp");if(bp)bp.remove();ask(n.title,n.msg,n.cta||"Roger that","Close",()=>{if(HOOK&&n.cta)req(hq("clicked")+"&id="+encodeURIComponent(id),"GET").catch(()=>{});ctaGo(n.ct);if(S.v=="home")homeV()},()=>{if(S.v=="home")homeV()})}
+function bellPanel(){if($("bp"))return;const ib=(DB.inbox||[]).slice(0,25),o=document.createElement("div");o.className="mod sheet";o.id="bp";
+ o.innerHTML=`<div class="glass"><div class="row" style="margin-bottom:6px"><h2>Mission Control</h2><button class="txt" id="bx">Close</button></div>${ib.length?ib.map(n=>`<div class="mrow" data-a="nopen" data-v="${esc(n.id)}"><div><b>${n.o?"":"\u25CF "}${esc(n.title)}</b><span class="co">${esc(n.msg)}</span><small class="co">${n.ts?ago(n.ts):""}${n.cta?" \u00b7 "+esc(n.cta):""}</small></div></div>`).join(""):'<p class="note">No messages yet. HQ will ping you here.</p>'}<div class="row" style="gap:8px;margin-top:12px"><button class="btn ghost sm" data-a="poll" style="flex:1">Check for new</button><button class="btn ghost sm" data-a="ntest" style="flex:1">Send test alert</button></div></div>`;
+ document.body.appendChild(o);$("bx").onclick=()=>o.remove();o.onclick=e=>{if(e.target===o)o.remove()}}
+window.__go=t=>ctaGo(t);window.__nid=id=>{notifSync().then(()=>nopen(id))};
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){notifSync();setTimeout(askApplied,400)}});window.addEventListener("focus",()=>setTimeout(askApplied,400));
 function askApplied(){const id=S.pend||DB.pend;if(!id||document.querySelector(".mod"))return;const j=DB.jobs[id];if(!j||j.st!="new"){S.pend="";DB.pend="";save();return}
  ask("Did you apply?",`Did you apply to ${j.t}${j.c?" at "+j.c:""}?`,"Yes, applied","Not yet",()=>{S.cur=id;S.pend="";DB.pend="";mark("applied")},()=>{S.pend="";DB.pend="";save()})}
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(askApplied,400)});window.addEventListener("focus",()=>setTimeout(askApplied,400));
-function toast(m){const t=document.createElement("div");t.textContent=m;t.style.cssText="position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--card);border:1px solid var(--pk);color:var(--ink);padding:12px 18px;border-radius:16px;z-index:70;max-width:86%;text-align:center;font-size:.9rem;box-shadow:0 4px 12px rgba(0,0,0,.1)";document.body.appendChild(t);setTimeout(()=>t.remove(),3800)}
-const TOURS={welcome:[["#nm","Type your name here, astronaut."],["#em","Your email id goes here. It signs your applications."],["#cs","Tick this to agree to the data note."],[".btn","Then tap here to report for duty."]],
-resume:[[".drop","Tap this box and pick your resume file."],[".btn","When the box turns green, tap Continue."]],
-roles:[["#rq","Tap here, type any role and pick it from the list."],[".btn","Add at least one role, then tap Continue."]],
-where:[[".chips","Pick the cities you want. Skip it to search everywhere."],["#pay","Optional: your minimum pay in LPA."],[".btn","Tap Continue."]],
-keys:[["#ak","Paste your Apify token here. Get it free at console.apify.com."],["#lm","Pick your AI crew. Free needs no key. Have a ChatGPT or Gemini key? Choose it and paste it below."],[".btn","Tap Continue."]],
-ready:[[".btn","This is it. Tap here to start the launch sequence!"]]};
-function maybeTour(){}
-const SLIDES=[["\u{1F680}","Your launch pad","Add your resume, pick roles and cities. We scan job boards and bring the best matches to you."],["\u{1F30C}","Galaxies","Each role becomes a galaxy showing jobs found and strong matches. Tap one to explore it."],["\u{1F449}","Swipe or tap","Swipe right to apply, left to skip. The buttons on each card do the same."],["\u2728","Sharper applications","Every job shows an ATS score. Tailor your resume and send an email written from your own wins."],["\u{1F4CA}","Mission Control","Track applications, follow-ups and goals on the Mission tab. Settings is in the bottom tab."]];
-function slides(i){i=i||0;const old=document.querySelector(".mod.tour");if(old)old.remove();const s=SLIDES[i],o=document.createElement("div");o.className="mod tour";o.innerHTML=`<div class="glass" style="text-align:center"><div style="font-size:3rem">${s[0]}</div><h2 style="margin-top:6px">${s[1]}</h2><p class="note" style="margin:8px 0 16px">${s[2]}</p><div class="row" style="justify-content:center;gap:6px;margin-bottom:14px">${SLIDES.map((_,k)=>`<span style="width:8px;height:8px;border-radius:50%;background:${k==i?"var(--pk)":"var(--line)"}"></span>`).join("")}</div><div class="row" style="gap:10px"><button class="btn ghost sm" id="sk2" style="flex:1">Skip</button><button class="btn sm" id="nx2" style="flex:1">${i==SLIDES.length-1?"Done":"Next"}</button></div></div>`;document.body.appendChild(o);$("sk2").onclick=()=>o.remove();$("nx2").onclick=()=>{o.remove();if(i<SLIDES.length-1)slides(i+1)}}
-const HELP={free:["No key needed. The free crew is shared, so it can be slow or busy.","If it is busy, emails and resume tailoring still work from your own resume.","Tap Test to see if it is reachable right now."],
-gemini:["Tap Open key page and sign in with Google.","Choose Create API key and copy it.","Paste it in the API key box. The endpoint and model are already filled.","Tap Test."],
-groq:["Tap Open key page and sign up (free).","Create an API key and copy it.","Paste it in the API key box. Endpoint and model are filled.","Tap Test."],
-or:["Tap Open key page, sign up and create a key.","Paste the key in the API key box.","The default model ends in :free, which costs nothing.","Tap Test."],
-mistral:["Tap Open key page and create an account.","Create an API key under API keys and copy it.","Paste it in the API key box.","Tap Test."],
-deepseek:["Tap Open key page and sign in.","Create an API key and copy it. It needs a small prepaid balance.","Paste it in the API key box.","Tap Test."],
-together:["Tap Open key page, sign up and create a key.","Paste it in the API key box.","Tap Test."],
-openai:["Tap Open key page and create a secret key.","Paste it in the API key box. Billing must be enabled on your OpenAI account.","Tap Test."],
-claude:["Tap Open key page and create an API key.","Paste it in the API key box. Billing must be enabled.","Tap Test."],
-custom:["Enter the full chat-completions URL of your own server. It must start with https.","Enter the model name exactly as your server lists it.","Add an API key only if your server needs one.","Tap Test."]};
-const aiHelp=p=>`<div class="lab">How to set up ${esc(p.n)}</div><ol class="note" style="margin:4px 0 0 18px;padding:0">${(HELP[p.id]||[]).map(x=>`<li style="margin:4px 0">${esc(x)}</li>`).join("")}</ol><div class="lab">Fields for this provider</div><div class="note" style="margin:0;word-break:break-all">Endpoint: ${esc(p.u||"your URL")}<br>Model: ${esc(p.m||"your model")}<br>Key: ${p.k?"required":"not needed"}</div>${p.h?`<button class="btn ghost sm" style="margin-top:8px" data-a="open" data-v="https://${esc(p.h)}">Open key page</button>`:""}`;
-const AGENCY=/recruit|staffing|consult|talent|placement|manpower|headhunt|hr (services|solutions)|executive search|outsourc|payroll|search firm/i;
-const FN=[[/brand|market|growth|content|seo|social|digital|crm|communication|campaign|performance|category/i,"15"],[/sales|business develop|key account|channel/i,"25"],[/product|program/i,"19"],[/engineer|developer|software|devops|qa\b|android|data scien/i,"8"],[/financ|audit|investment|account/i,"10"],[/\bhr\b|talent|people/i,"12"],[/operation|supply|logistic|procure/i,"18"],[/design|creative/i,"3"],[/analyst|analytics|research/i,"24"]];
-const fnOf=t=>{for(const [r,i] of FN)if(r.test(t||""))return i;return""};
-const vk=t=>rk(t||"").slice(0,2).join(" ");
-const person=p=>({n:((p.firstName||"")+" "+(p.lastName||"")).trim()||p.name||"",h:p.headline||p.position||((p.currentPosition||[])[0]||{}).position||"",u:p.linkedinUrl,c:((p.currentPosition||[])[0]||{}).companyName||""});
-function rank(list,j){const tk=rk(j.t||"");return list.map(p=>{const hh=(p.h||"").toLowerCase();let s=0;tk.forEach(w=>{if(hh.includes(w))s+=3});if(/manager|lead|head|director|vp|chief|senior/.test(hh))s+=1;if(/recruit|talent|\bhr\b|human resources/.test(hh))s-=2;if(AGENCY.test(hh))s-=4;return{...p,s}}).sort((a,b)=>b.s-a.s)}
-function parseG(items,j){const tok=(j.c||"").toLowerCase().split(/\s+/)[0],out=[],seen=new Set();(items||[]).forEach(it=>{(it.organicResults||[it]).forEach(r=>{const u=String(r.url||"").split("?")[0];if(!/linkedin\.com\/in\//i.test(u)||seen.has(u))return;const raw=String(r.title||"").replace(/\s*[|\u2013-]\s*LinkedIn.*$/i,""),parts=raw.split(/\s[-\u2013\u2014]\s/),n=(parts[0]||"").trim(),hl=(parts.slice(1).join(" - ")||String(r.description||"").slice(0,100)).trim(),blob=(raw+" "+(r.description||"")).toLowerCase();if(!n||n.split(/\s+/).length>5||(tok&&!blob.includes(tok)))return;seen.add(u);out.push({n,h:hl,u,c:hl})})});return out}
-async function fetchPeople(j,wide){const co=(j.c||"").replace(/["']/g,""),slug=co.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),url=j.cu&&/linkedin\.com\/company/.test(j.cu)?j.cu.split("?")[0]:"https://www.linkedin.com/company/"+slug,fid=fnOf(j.t),vq=vk(j.t),mi=wide?30:15,base={maxItems:mi,profileScraperMode:"Short ($4 per 1k)"},
- act=(a,inp,to)=>req(A+a+"/run-sync-get-dataset-items?timeout="+(to||100)+"&token="+encodeURIComponent(cfg("apify")),"POST",JSON.stringify(inp)).then(t=>{const x=JSON.parse(t);return Array.isArray(x)?x:[]});
- const all=[],add=l=>{const have=new Set(all.map(x=>x.u));l.forEach(x=>{if(!have.has(x.u)){all.push(x);have.add(x.u)}})};
- try{const q=wide?`site:linkedin.com/in "${co}" manager OR lead OR head OR director OR senior`:`site:linkedin.com/in "${co}" ${vq}\nsite:linkedin.com/in "${co}" ${(j.t||"").split(/\s+/).slice(0,3).join(" ")}`;add(parseG(await act("apify~google-search-scraper",{queries:q,maxPagesPerQuery:wide?2:1,resultsPerPage:10,countryCode:"in",languageCode:"en"},80),j))}catch(e){}
- if(all.length<6){const tries=wide?[{companies:[url],...base}]:[{companies:[url],...(fid?{functionIds:[fid]}:{}),...base},{companies:[url],searchQuery:vq,...base},{companies:[url],...base}];
-  for(const inp of tries){try{const r=(await act("harvestapi~linkedin-company-employees",inp)).filter(x=>x&&x.linkedinUrl).map(person);if(r.length){add(r);break}}catch(e){}}}
- if(all.length<3){try{const nm=co.toLowerCase().split(/\s+/)[0],r=(await act("harvestapi~linkedin-profile-search",{searchQuery:vq+" "+co,maxItems:mi,profileScraperMode:"Short ($4 per 1k)"})).filter(x=>x&&x.linkedinUrl).map(person).filter(x=>nm&&((x.c||"").toLowerCase().includes(nm)||(x.h||"").toLowerCase().includes(nm)));add(r)}catch(e){}}
- return all}
-const lkSearch=j=>"https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent((j.c||"")+" "+vk(j.t));
-const refBox=j=>{const find=`<button class="btn ghost sm" style="margin-top:10px" data-a="open" data-v="${esc(lkSearch(j))}">Open LinkedIn people search</button>`;
- if(AGENCY.test(j.c||"")&&!j.rf)return`<p class="note">${esc(j.c)} looks like a recruitment or consulting firm. Referrals work best on jobs posted by the hiring company itself.</p><button class="btn ghost sm" data-a="refs" data-v="force">Try anyway</button>`+find;
- if(!j.pool)return`<p class="note">Find people at ${esc(j.c||"this company")}. I pick the ones closest to this role first.</p><button class="btn ghost sm" data-a="refs">Find referral contacts</button>`+find;
- const sh=j.pool.slice(0,j.rs||3);return(sh.length?sh.map(x=>`<div class="app"><div class="lg s" style="background:${col(x.n)}"><span>${esc((x.n||"?")[0])}</span></div><div><b>${esc(x.n)}</b><div class="co">${esc(x.h)}</div></div><div class="x"><button class="btn sm" data-a="open" data-v="${esc(x.u)}">Connect</button><button class="btn sm ghost" data-a="msg" data-v="${esc(x.n)}">Copy intro</button></div></div>`).join(""):'<p class="note">I could not pull names automatically this time. Use the LinkedIn search below, it is pre-filled for this company and role.</p>')+`<button class="btn ghost sm" style="margin-top:10px" data-a="more">${(j.rs||3)<j.pool.length?"Search for more":"Search wider"}</button>`+find};
-const TLR='Rewrite resume lines so they naturally include the missing ATS keywords, using the Google XYZ format: "Accomplished [X] as measured by [Y], by doing [Z]". Use ONLY facts already in the resume. Never invent numbers, employers or tools the candidate has not used. If a keyword cannot be added truthfully, skip it. Return JSON {"changes":[{"old":"<exact existing resume line>","new":"<rewritten line containing the keyword>","kw":"<keyword>"}]} with at most 6 changes.';
-const KWSKIP=new Set("brand leader manager senior role ability strong excellent knowledge understanding responsible including candidate looking join working years experience required preferred team business company work".split(" "));
-function missKw(j,a){const jd=(j.jd||"").toLowerCase(),rt=(DB.rt||"").toLowerCase(),sk=SK.filter(s=>jd.includes(s)&&!rt.includes(s)),ex=(a?a.miss:[]).filter(w=>w.length>4&&!KWSKIP.has(w)&&!sk.includes(w));return[...sk,...ex].slice(0,8)}
-function lineFor(lines,kw,j,used){const jd=(j.jd||"").toLowerCase(),i=jd.indexOf(kw),ctx=new Set(jd.slice(Math.max(0,i-90),i+90).match(/[a-z]{4,}/g)||[]);let pool=lines.filter(l=>!used.has(l)&&!/years of experience/i.test(l));if(!pool.length)pool=lines.filter(l=>!used.has(l));let best=null,bs=-1;pool.forEach(l=>{const w=l.toLowerCase().match(/[a-z]{4,}/g)||[],s=w.filter(x=>ctx.has(x)).length+(/%|cr\b|bn\b|\d{2,}/i.test(l)?3:0)+(l.length>60?1:0);if(s>bs){bs=s;best=l}});return best}
-function bestMatch(lines,old){const o=old.toLowerCase().replace(/\s+/g," ").trim();let best=null,bs=0;lines.forEach(l=>{const ll=l.toLowerCase();if(ll==o||ll.includes(o.slice(0,30))||o.includes(ll.slice(0,30))){bs=99;best=l;return}const w=new Set(ll.match(/[a-z]{4,}/g)||[]),ow=o.match(/[a-z]{4,}/g)||[],s=ow.filter(x=>w.has(x)).length/Math.max(1,ow.length);if(s>bs&&s>.6){bs=s;best=l}});return best}
-async function tailor(j){const a=ats(j);if(!a)throw new Error("Resume text not found. Re-upload your resume in Settings.");const kws=missKw(j,a);if(!kws.length)throw new Error("Your resume already covers this job's keywords");const lines=resumeLines();if(!lines.length)throw new Error("Resume text not found. Re-upload your resume in Settings.");let ch=[];
- if(aiOn()){try{const r=await ai(TLR,`MISSING KEYWORDS: ${kws.join(", ")}\nJOB TITLE: ${j.t}\nJOB CONTEXT: ${(j.jd||"").slice(0,900)}\nRESUME LINES:\n${lines.slice(0,50).join("\n")}`);(r.changes||[]).forEach(c=>{if(!c.new||!c.old)return;const o=bestMatch(lines,String(c.old));if(o&&!ch.some(x=>x.old==o))ch.push({old:o,new:String(c.new),kw:c.kw||""})})}catch(e){}}
- if(!ch.length){const used=new Set();kws.slice(0,5).forEach(k=>{const l=lineFor(lines,k,j,used);if(l){used.add(l);ch.push({old:l,new:l.replace(/[.;]$/,"")+", leveraging "+k+".",kw:k,basic:true})}})}
- return ch}
-function applyChanges(t,ch){const L=t.split("\n");ch.forEach(c=>{const k=String(c.old).slice(0,40),i=L.findIndex(l=>l.includes(k));if(i>=0)L[i]=L[i].replace(/^([\s\u2022*\-]*).*$/,(m,b)=>b+c.new)});return L.join("\n")}
-async function makeDocx(t){const z=new JSZip(),x=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
- z.file("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
- z.file("_rels/.rels",'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
- z.file("word/document.xml",'<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>'+t.split("\n").map(l=>`<w:p><w:r><w:t xml:space="preserve">${x(l)}</w:t></w:r></w:p>`).join("")+'</w:body></w:document>');return await z.generateAsync({type:"base64"})}
-async function notifSync(){if(!HOOK||!DB.consent||!DB.email)return;try{if(NATIVE&&Android.setNotif)Android.setNotif(HOOK,DB.email,KEY);const t=await req(HOOK+"?a=inbox&k="+encodeURIComponent(KEY)+"&email="+encodeURIComponent(DB.email),"GET"),a=JSON.parse(t);if(Array.isArray(a)){a.forEach(x=>{if(!x.dv&&NATIVE&&Android.showNotif)Android.showNotif(String(x.id),x.title||"",x.msg||"",x.cta||"",x.ct||"")});DB.inbox=a.slice(0,30);save();if(S.v=="home")homeV()}}catch(e){}}
-function ctaGo(t){t=String(t||"").trim();if(/^https?:/.test(t))openU(t);else if(["home","jobs","dash","set"].includes(t)){S.v=t;S.edit=false;render()}}
-function nopen(id){const n=(DB.inbox||[]).find(x=>String(x.id)==String(id));if(!n)return;if(!n.o){n.o=1;save();if(HOOK)req(HOOK+"?a=opened&k="+encodeURIComponent(KEY)+"&email="+encodeURIComponent(DB.email)+"&id="+encodeURIComponent(id),"GET").catch(()=>{})}ask(n.title,n.msg,n.cta||"Roger that","Close",()=>{ctaGo(n.ct);if(S.v=="home")homeV();if(S.v=="set")setV()},()=>{if(S.v=="home")homeV()})}
-window.__go=t=>ctaGo(t);window.__nid=id=>{notifSync().then(()=>nopen(id))};
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)notifSync()});
-const IC={home:'<path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/>',jobs:'<circle cx="12" cy="12" r="9"/><path d="M15.6 8.4l-2.1 5.100-5.100 2.100 2.100-5.100z"/>',dash:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',set:'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',rocket:'<path d="M12 2c3 2.500 4.500 6 4 10l-2 3h-4l-2-3c-.5-4 1-7.500 4-10z"/><circle cx="12" cy="9" r="1.600"/><path d="M8 14l-3 3 3 .5M16 14l3 3-3 .5M12 17v4"/>',mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',chat:'<path d="M21 12a8 8 0 01-11.500 7.200L4 20l1-4.500A8 8 0 1121 12z"/>',user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',briefcase:'<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',pin:'<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',cpu:'<rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/>',sparkles:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',message:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',lock:'<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',moon:'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',sun:'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>',auto:'<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><path d="M12 18h.01"/>'};
-const ic=(n,s)=>`<svg width="${s||22}" height="${s||22}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${IC[n]}</svg>`;
-(function(){["home","jobs","dash","set"].forEach((n,i)=>{const e=document.getElementById("i"+(i+1));if(e)e.innerHTML=ic(n,22)});const g=document.getElementById("gi");if(g)g.innerHTML=ic("set",22);
- const el=document.createElement("div");el.id="stars";let a="",b="";for(let i=0;i<70;i++)a+=(i?",":"")+`${(Math.random()*100).toFixed(1)}vw ${(Math.random()*100).toFixed(1)}vh 0 ${Math.random()<.2?1:0}px rgba(255,255,255,${(.25+Math.random()*.6).toFixed(2)})`;for(let i=0;i<30;i++)b+=(i?",":"")+`${(Math.random()*100).toFixed(1)}vw ${(Math.random()*100).toFixed(1)}vh 0 1px rgba(214,205,255,.8)`;
- el.innerHTML=`<i style="box-shadow:${a}"></i><i class="tw" style="box-shadow:${b}"></i>`;document.body.insertBefore(el,document.body.firstChild)})();
+
+// ---------- galaxies ----------
+const GX=new WeakMap();let gRaf=0,gLast=0;
+function seeded(n){let s=n*9301+7;return()=>(s=(s*9301+49297)%233280)/233280}
+const galHtml=(st,scan)=>{const R=seeded(DB.roles.length+3);return`<div class="gal">${DB.roles.map((r,i)=>{const s=st&&st[r],sz=118+Math.round(R()*40),dx=(R()*16-8).toFixed(1),dy=(R()*16-8).toFixed(1),dur=(9+R()*8).toFixed(1),mt=Math.round(R()*46),ml=Math.round(R()*30-15);
+ return`<button class="gx" ${scan?"":`data-a="gal" data-v="${esc(r)}"`} style="--dx:${dx}px;--dy:${dy}px;--d:${dur}s;margin-top:${mt}px;margin-left:${ml}px"><canvas class="gc" width="300" height="300" data-h="${(i*47+285)%360}" data-s="${i+3}" style="width:${sz}px;height:${sz}px"></canvas><div class="gn">${esc(r)}</div><div class="gs">${scan||!s?"Scanning...":`Found <b>${s.f}</b> \u00b7 Match <b>${s.m}</b>`}</div></button>`}).join("")}</div>`};
+function mkGal(c){const hue=+c.dataset.h,seed=+c.dataset.s,rnd=seeded(seed),arms=2+(seed%2),st=[];
+ for(let i=0;i<1150;i++){const arm=i%arms,r=Math.pow(rnd(),.72);st.push({r,a:arm*(6.2832/arms)+r*4.4+(rnd()-.5)*(.45+r*.95),z:(rnd()-.5)*.07*(1-r),m:.5+rnd()*.9,c:rnd()})}
+ for(let i=0;i<300;i++){const r=Math.pow(rnd(),2.2)*.32;st.push({r,a:rnd()*6.2832,z:(rnd()-.5)*.1,m:.6+rnd()*.8,c:.05})}
+ return{st,hue,seed,spin:rnd()*6,vx:0,vy:0,rotX:.62,lt:0}}
+function drawGal(c,g,t){try{const x=c.getContext("2d");if(!x)return;const dt=Math.min(.06,g.lt?(t-g.lt)/1000:.016);g.lt=t;
+ if(!DB.noGalaxyAnim)g.spin+=(0.55+g.vx)*dt;else g.spin+=g.vx*dt;g.rotX+=g.vy*dt+(.62-g.rotX)*.35*dt;g.vx*=Math.pow(.12,dt);g.vy*=Math.pow(.08,dt);
+ const rotY=Math.sin(t*.00022+g.seed)*.28,W=c.width,R=W*.46,cx=W/2,cy=W/2,cX=Math.cos(g.rotX),sX=Math.sin(g.rotX),cY=Math.cos(rotY),sY=Math.sin(rotY),u=W/300,fov=520;
+ x.globalCompositeOperation="source-over";x.clearRect(0,0,W,W);let gr=x.createRadialGradient(cx,cy,0,cx,cy,R);gr.addColorStop(0,`hsla(${g.hue},85%,65%,.30)`);gr.addColorStop(.4,`hsla(${g.hue+25},80%,45%,.10)`);gr.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=gr;x.beginPath();x.ellipse(cx,cy,R,R*Math.max(.25,Math.abs(cX))*1.15,0,0,6.3);x.fill();
+ x.globalCompositeOperation="lighter";
+ for(const s of g.st){const a=s.a+g.spin*(.55+.65/(.3+s.r)),px=Math.cos(a)*s.r*R,py=Math.sin(a)*s.r*R,pz=s.z*R,y1=py*cX-pz*sX,z1=py*sX+pz*cX,x2=px*cY+z1*sY,z2=-px*sY+z1*cY,k=fov/(fov+z2+R),X=cx+x2*k,Y=cy+y1*k,core=s.r<.28,h=core?42:g.hue+s.c*70-25,l=core?86:58+s.c*28,al=core?.75:.35+.5*(1-s.r),z=s.m*(core?1.7:1.3)*u*k;x.fillStyle=`hsla(${h},${core?55:92}%,${l}%,${al})`;x.fillRect(X-z/2,Y-z/2,z,z)}
+ gr=x.createRadialGradient(cx,cy,0,cx,cy,R*.3);gr.addColorStop(0,"rgba(255,246,220,.95)");gr.addColorStop(.4,"rgba(255,205,150,.38)");gr.addColorStop(1,"rgba(255,160,100,0)");x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R*.3,0,6.3);x.fill();x.globalCompositeOperation="source-over"}catch(e){}}
+function startGal(){if(gRaf)return;const loop=t=>{const cs=document.querySelectorAll("canvas.gc");if(!cs.length){gRaf=0;return}if(t-gLast>22){gLast=t;cs.forEach(c=>{let g=GX.get(c);if(!g){g=mkGal(c);GX.set(c,g)}drawGal(c,g,t)})}gRaf=requestAnimationFrame(loop)};gRaf=requestAnimationFrame(loop)}
+function bindGal(){document.querySelectorAll(".gx").forEach(btn=>{const c=btn.querySelector("canvas");if(!c)return;let down=false,lx=0,ly=0,moved=false;
+ c.onpointerdown=e=>{down=true;moved=false;lx=e.clientX;ly=e.clientY;try{c.setPointerCapture(e.pointerId)}catch(x){}};
+ c.onpointermove=e=>{if(!down)return;const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;const g=GX.get(c);if(g){g.vx=Math.max(-9,Math.min(9,g.vx-dx*.28));g.vy=Math.max(-1.1,Math.min(1.1,g.vy+dy*.03))}lx=e.clientX;ly=e.clientY};
+ c.onpointerup=c.onpointercancel=()=>{down=false};btn.onclick=e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false}}})}
+function galStats(){const m={};DB.roles.forEach(r=>m[r]={f:0,m:0});Object.values(DB.jobs).forEach(j=>{if(j.st!="new"||!j.role||!m[j.role])return;m[j.role].f++;let s=j.ats||0;if(!s){const a=ats(j);if(a){j.ats=a.tot;s=a.tot}}if(Math.max(j.sc||0,s)>=70)m[j.role].m++});return m}
+
+// ---------- views ----------
 const TABS=["home","jobs","dash","set"];
 function render(){if(S.splash)return;$("ban").innerHTML=S.upd?`<div class="ban"><span>Update v${esc(S.upd.v)} is ready</span><button data-a="upd">Update</button></div>`:"";
  if(!DB.name||!DB.email||!DB.consent)S.v="welcome";if(!S.v)S.v=DB.rname&&DB.roles.length?"home":"resume";
  $("tabs").style.display=TABS.includes(S.v)&&!S.load?"flex":"none";document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v==S.v));
- const showTopGear = ["welcome","resume","roles","where","keys","ready"].includes(S.v) && !S.load;
- $("gi").style.display = showTopGear ? "block" : "none";
+ $("gi").style.display=["welcome","resume","roles","where","keys","ready"].includes(S.v)&&!S.load?"block":"none";updBell();
  if(S.load){loadingV();setTimeout(startGal,0);return}
  ({welcome,resume:resumeV,roles:rolesV,where:whereV,keys:keysV,ready:readyV,home:homeV,jobs:jobsV,dash:dashV,set:setV})[S.v]();
- setTimeout(startGal,0);
- if(!DB.noAnim) {
-     const vEl = $("v");
-     vEl.classList.remove("page-fade");
-     void vEl.offsetWidth;
-     vEl.classList.add("page-fade");
- }
-}
+ setTimeout(startGal,0);if(!DB.noAnim){const e=$("v");e.classList.remove("page-fade");void e.offsetWidth;e.classList.add("page-fade")}}
 function welcome(){$("v").innerHTML=`${cap("Welcome aboard the <b>Starlight Voyager</b>, astronaut! I'm <b>Captain A7</b>, your guide. Add your name and email to get started.")}<h1>Crew <em>manifest</em></h1>
 <input id="nm" placeholder="Your name" value="${esc(DB.name)}" autocomplete="name"><input id="em" type="email" placeholder="Your email id" value="${esc(DB.email)}" autocomplete="email"><input id="ph" type="tel" placeholder="Mobile (optional)" value="${esc(DB.phone)}">
 <label class="chk"><input type="checkbox" id="cs" ${DB.consent?"checked":""}><span>I agree that Escape Velocity may share my name, email, mobile, phone model, searches and applications with the app owner to run and improve the service. My resume text and keys are never shared.</span></label>
@@ -413,132 +430,44 @@ function rolesV(){$("v").innerHTML=`<h1>Pick your <em>roles</em>.</h1><p class="
 <div class="chips">${DB.roles.map(r=>chip(r,1,"role")).join("")}</div><input id="rq" autocomplete="off" placeholder="Search or add a role..."><div class="dd" id="dd"></div>
 ${DB.custom.length?`<h3 style="margin-top:16px">Saved by you</h3><div class="chips">${DB.custom.map(r=>chip(r,DB.roles.includes(r),"role")).join("")}</div>`:""}
 <button class="btn" data-a="next" data-v="where" ${DB.roles.length?"":"disabled"}>${S.edit?"Save":"Continue"}</button>`;
- const q=$("rq"),dd=$("dd"),show=()=>{const t=q.value.trim().toLowerCase(),all=allRoles();let l;if(!t){l=all.map(r=>[r,rscore(r)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,7).map(x=>`<button data-a="role" data-v="${esc(x[0])}"><span class="st">\u2605</span> ${esc(x[0])}</button>`);if(l.length)l.unshift('<button disabled style="color:var(--mut);font-size:.78rem">Matches your resume</button>')}
-  else{l=all.filter(r=>r.toLowerCase().includes(t)).slice(0,8).map(r=>`<button data-a="role" data-v="${esc(r)}">${esc(r)}${rscore(r)?' <span class="st">\u2605</span>':""}</button>`);if(!all.some(r=>r.toLowerCase()==t))l.push(`<button data-a="addrole" data-v="${esc(q.value.trim())}">+ Add "${esc(q.value.trim())}"</button>`)}dd.innerHTML=l.join("");
- if(!DB.noDropdownAnim && l.length) { dd.style.animation = 'none'; dd.offsetHeight; dd.style.animation = 'slideDown 0.25s ease-out'; }
- };
- q.oninput=show;q.onfocus=show;q.onkeydown=e=>{if(e.key=="Enter"&&q.value.trim())ACT.addrole(q.value.trim())}}
+ const qq=$("rq"),dd=$("dd"),show=()=>{const t=qq.value.trim().toLowerCase(),all=allRoles();let l;
+  if(!t){l=all.map(r=>[r,rscore(r)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,7).map(x=>`<button data-a="role" data-v="${esc(x[0])}"><span class="st">\u2605</span> ${esc(x[0])}</button>`);if(l.length)l.unshift('<button disabled style="color:var(--mut);font-size:.78rem">Matches your resume</button>')}
+  else{l=all.filter(r=>r.toLowerCase().includes(t)).slice(0,8).map(r=>`<button data-a="role" data-v="${esc(r)}">${esc(r)}${rscore(r)?' <span class="st">\u2605</span>':""}</button>`);if(!all.some(r=>r.toLowerCase()==t))l.push(`<button data-a="addrole" data-v="${esc(qq.value.trim())}">+ Add "${esc(qq.value.trim())}"</button>`)}
+  dd.innerHTML=l.join("");if(!DB.noDropdownAnim&&l.length){dd.style.animation="none";void dd.offsetHeight;dd.style.animation="slideDown .25s ease-out"}};
+ qq.oninput=show;qq.onfocus=show;qq.onkeydown=e=>{if(e.key=="Enter"&&qq.value.trim())ACT.addrole(qq.value.trim())}}
 function whereV(){$("v").innerHTML=`<h1>Where, and <em>how much</em>?</h1><p class="sub">Location helps. Pay is optional.</p><div class="chips">${LOCS.map(x=>chip(x,DB.locs.includes(x),"loc")).join("")}</div>
 <h3 style="margin-top:20px">Minimum pay, LPA (optional)</h3><input type="number" id="pay" inputmode="numeric" placeholder="e.g. 25" value="${esc(DB.pay)}"><button class="btn" data-a="next" data-v="keys">${S.edit?"Save":"Continue"}</button>`;$("pay").oninput=e=>{DB.pay=e.target.value;save()}}
-function keysV(){const p=prov();$("v").innerHTML=`<h1>Fuel <em>up</em></h1>
-<h3>1. Job scan token (Apify)</h3><input type="password" id="ak" value="${esc(cfg("apify"))}" placeholder="apify_api_..."><p class="note" style="margin:8px 0">Get it free at console.apify.com, Settings, API and integrations.</p>
-<h3 style="margin-top:14px">2. AI crew (optional)</h3><select id="lm">${PROV.map(x=>`<option value="${x.id}"${x.id==p.id?" selected":""}>${esc(x.n)}</option>`).join("")}</select>
-<input id="au" value="${esc(cfg("aiurl")||p.u)}" placeholder="Endpoint URL"><input id="am" value="${esc(cfg("aimodel")||p.m)}" placeholder="Model">${p.k?`<input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="API key">`:""}<p class="note" style="margin:8px 0">${p.k&&p.h?"Get a key at "+esc(p.h):"No key needed."}</p>
+const aiFields=p=>p.id=="free"?'<p class="note" style="margin:8px 0">The free crew is shared and needs no setup.</p>':`<input id="au" value="${esc(cfg("aiurl")||p.u)}" placeholder="Endpoint URL"><input id="am" value="${esc(cfg("aimodel")||p.m)}" placeholder="Model">${p.k?`<input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="API key">`:""}`;
+function saveAI(){const p=prov(),u=($("au")||{}).value||"",m=($("am")||{}).value||"";cfg("aiurl",p.id!="free"&&u.trim()&&u.trim()!=p.u?u.trim():"");cfg("aimodel",p.id!="free"&&m.trim()&&m.trim()!=p.m?m.trim():"");if($("ik"))cfg("aikey",$("ik").value.trim())}
+function keysV(){const p=prov();$("v").innerHTML=`<h1>Fuel <em>up</em></h1><h3>1. Job scan token (Apify)</h3><input type="password" id="ak" value="${esc(cfg("apify"))}" placeholder="apify_api_..."><p class="note" style="margin:8px 0">Get it free at console.apify.com, Settings, API and integrations.</p>
+<h3 style="margin-top:14px">2. AI crew (optional)</h3><select id="lm">${PROV.map(x=>`<option value="${x.id}"${x.id==p.id?" selected":""}>${esc(x.n)}</option>`).join("")}</select>${aiFields(p)}
 <button class="btn" data-a="keynext">Continue</button>`;$("lm").onchange=e=>{cfg("llm",e.target.value);cfg("aiurl","");cfg("aimodel","");keysV()}}
 function readyV(){$("v").innerHTML=`<h1>Ready for <em>liftoff</em>?</h1><p class="sub">${esc(DB.roles.join(", "))} \u00b7 ${esc(DB.locs.join(", ")||"Anywhere")}</p><button class="btn" data-a="launch">Click here to launch \u{1F680}</button>${cfg("apify")?"":'<p class="note" style="margin-top:12px">No Apify token yet. Add it in Settings (top right) or scanning will not work.</p>'}`}
-const galHtml=(st,scan)=>{
- return`<div class="gal" style="height:auto">${DB.roles.map((r,i)=>{const s=st&&st[r],sz=118+Math.round(Math.random()*44),dx=(Math.random()*16-8).toFixed(1),dy=(Math.random()*16-8).toFixed(1),dur=(9+Math.random()*8).toFixed(1);
- return`<button class="gx" ${scan?"":`data-a="gal" data-v="${esc(r)}"`} style="--dx:${dx}px;--dy:${dy}px;--d:${dur}s"><canvas class="gc" width="300" height="300" data-h="${(i*47+285)%360}" data-s="${i+3}" style="width:${sz}px;height:${sz}px;transform:rotate(${(i*41)%70-35}deg)"></canvas><div class="gn">${esc(r)}</div><div class="gs">${scan||!s?"Scanning...":`Found <b>${s.f}</b> \u00b7 Match <b>${s.m}</b>`}</div></button>`}).join("")}</div>`};
-const GX=new WeakMap();let gRaf=0,gLast=0;
-function mkGal(c){const hue=+c.dataset.h,seed=+c.dataset.s;let rs=seed*9301+7;const rnd=()=>(rs=(rs*9301+49297)%233280)/233280,arms=2+(seed%2),st=[];
- for(let i=0;i<1150;i++){const arm=i%arms,r=Math.pow(rnd(),.72);st.push({r,a:arm*(6.2832/arms)+r*4.4+(rnd()-.5)*(.45+r*.95),z:(rnd()-.5)*.07*(1-r),m:.5+rnd()*.9,c:rnd()})}
- for(let i=0;i<300;i++){const r=Math.pow(rnd(),2.2)*.32;st.push({r,a:rnd()*6.2832,z:(rnd()-.5)*.1,m:.6+rnd()*.8,c:.05,core:1})}
- return{st,hue,rotX:0.6,rotY:0,vx:0,vy:0}}
-function drawGal(c,g,t){
-    try {
-        const x=c.getContext("2d");if(!x)return;
-        const W=c.width,R=W*.46,cx=W/2,cy=W/2;
-        
-        g.rotY += (g.vx||0) + 0.007;
-        g.rotX += (g.vy||0);
-        
-        g.vx = (g.vx||0)*0.92;
-        g.vy = (g.vy||0)*0.92;
-        
-        // Spring back to default tilt
-        g.rotX += (0.6 - g.rotX) * 0.02;
-
-        const cosX=Math.cos(g.rotX),sinX=Math.sin(g.rotX),cosY=Math.cos(g.rotY),sinY=Math.sin(g.rotY);
-        x.globalCompositeOperation="source-over";x.clearRect(0,0,W,W);
-        let gr=x.createRadialGradient(cx,cy,0,cx,cy,R);gr.addColorStop(0,`hsla(${g.hue},85%,65%,.30)`);gr.addColorStop(.4,`hsla(${g.hue+25},80%,45%,.10)`);gr.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=gr;x.beginPath();x.ellipse(cx,cy,R, R*Math.abs(cosX)*1.2, 0,0,6.3);x.fill();
-        x.globalCompositeOperation="lighter";const u=W/300,fov=500;
-        for(const s of g.st){
-            const px=Math.cos(s.a)*s.r*R,py=Math.sin(s.a)*s.r*R,pz=s.z*R;
-            const y1=py*cosX-pz*sinX,z1=py*sinX+pz*cosX,x2=px*cosY+z1*sinY,z2=-px*sinY+z1*cosY;
-            const scale=fov/(fov+z2+R),X=cx+x2*scale,Y=cy+y1*scale;
-            const core=s.r<.28,h=core?42:g.hue+s.c*70-25,l=core?86:58+s.c*28,al=core?.75:.35+.5*(1-s.r),z=s.m*(core?1.7:1.3)*u*scale;
-            x.fillStyle=`hsla(${h},${core?55:92}%,${l}%,${al})`;x.fillRect(X-z/2,Y-z/2,z,z)
-        }
-        gr=x.createRadialGradient(cx,cy,0,cx,cy,R*.3);gr.addColorStop(0,"rgba(255,246,220,.95)");gr.addColorStop(.4,"rgba(255,205,150,.38)");gr.addColorStop(1,"rgba(255,160,100,0)");x.fillStyle=gr;x.beginPath();x.arc(cx,cy,R*.3,0,6.3);x.fill();x.globalCompositeOperation="source-over"
-    } catch(e) {
-        console.error("Galaxy draw error:", e);
-    }
-}
-function startGal(){
-    if(gRaf)return;
-    const loop=t=>{
-        try {
-            const cs=document.querySelectorAll("canvas.gc");
-            if(!cs.length){gRaf=0;return}
-            if(t-gLast>33){gLast=t;cs.forEach(c=>{let g=GX.get(c);if(!g){g=mkGal(c);GX.set(c,g)}drawGal(c,g,t)})}
-            gRaf=requestAnimationFrame(loop)
-        } catch(e) {
-            console.error("Galaxy loop error:", e);
-            gRaf = 0;
-        }
-    };
-    gRaf=requestAnimationFrame(loop);
-}
-function galStats(){const m={};DB.roles.forEach(r=>m[r]={f:0,m:0});Object.values(DB.jobs).forEach(j=>{if(j.st!="new"||!j.role||!m[j.role])return;m[j.role].f++;let s=j.ats||0;if(!s){const a=ats(j);if(a){j.ats=a.tot;s=a.tot}}if(Math.max(j.sc||0,s)>=70)m[j.role].m++});return m}
-function galV(){const st=galStats(),tot=Object.values(st).reduce((a,x)=>({f:a.f+x.f,m:a.m+x.m}),{f:0,m:0});
- $("v").innerHTML=`<h1>Choose your <em>galaxy</em></h1><p class="sub">Each galaxy is a role you are hunting. Tap one to explore its jobs.</p>${DB.roles.length?galHtml(st,false):'<p class="note">Pick at least one role first.</p>'}<button class="btn" data-a="gal" data-v="all">Select all galaxies (${tot.f} jobs, ${tot.m} strong matches)</button><button class="btn ghost" data-a="refresh">\u{1F504} Refresh and search for more jobs</button>${S.note?`<p class="note" style="margin-top:12px">${esc(S.note)}</p>`:""}`;
- setTimeout(() => {
-    document.querySelectorAll(".gx").forEach(btn => {
-        const c = btn.querySelector("canvas");
-        if (!c) return;
-        let isDown = false, lastX = 0, lastY = 0, didDrag = false;
-        c.onpointerdown = e => {
-            isDown = true; didDrag = false; lastX = e.clientX; lastY = e.clientY;
-            try { c.setPointerCapture(e.pointerId); } catch(x) {}
-        };
-        c.onpointermove = e => {
-            if (!isDown) return;
-            let dx = e.clientX - lastX;
-            let dy = e.clientY - lastY;
-            if (Math.abs(dx) > 2 || Math.abs(dy) > 2) didDrag = true;
-            let g = GX.get(c);
-            if (g) {
-                g.vx = -dx * 0.008; // easier to spin horizontally
-                g.vy = dy * 0.002;  // harder to tilt vertically
-            }
-            lastX = e.clientX;
-            lastY = e.clientY;
-        };
-        c.onpointerup = c.onpointercancel = () => { isDown = false; };
-        btn.onclick = e => {
-            if (didDrag) { e.preventDefault(); e.stopPropagation(); }
-        };
-    });
- }, 100);
-}
 function loadingV(){$("tabs").style.display="none";$("v").innerHTML=`<h1>Scanning the <em>galaxies</em></h1><p class="sub">${esc(S.load)}<br>This can take a minute or two. Keep the app open.</p>${galHtml(null,true)}`}
-function homeV(){try{const J=Object.values(DB.jobs),ap=J.filter(j=>["applied","int","offer","rej"].includes(j.st)),q=queue(),wk=ap.filter(j=>dayAgo(j.ap||0)<7).length,top=q.slice(0,3),st=DB.src||{},nf=(DB.inbox||[]).filter(n=>!n.o),first=(DB.name||"").split(" ")[0];
- $("v").innerHTML=`<div class="hero">${mini(64)}<div><h1 style="margin:0;font-size:1.7rem">Hey ${esc(first)}, <em>ready</em>?</h1><p class="sub" style="margin:2px 0 0">${q.length?q.length+" jobs are in orbit for you.":"Your queue is empty. Let's scan the galaxies."}</p></div></div>
+function galV(){const st=galStats(),tot=Object.values(st).reduce((a,x)=>({f:a.f+x.f,m:a.m+x.m}),{f:0,m:0});
+ $("v").innerHTML=`<h1>Choose your <em>galaxy</em></h1><p class="sub">Each galaxy is a role you are hunting. Tap one to enter it, or drag to spin it.</p>${DB.roles.length?galHtml(st,false):'<p class="note">Pick at least one role first.</p>'}<button class="btn" data-a="gal" data-v="all">Select all galaxies (${tot.f} jobs, ${tot.m} strong matches)</button><button class="btn ghost" data-a="refresh">\u{1F504} Refresh and search for more jobs</button>${S.note?`<p class="note" style="margin-top:12px">${esc(S.note)}</p>`:""}`;setTimeout(bindGal,60)}
+function homeV(){try{const J=Object.values(DB.jobs),ap=J.filter(j=>["applied","int","offer","rej"].includes(j.st)),qu=queue(),wk=ap.filter(j=>dayAgo(j.ap||0)<7).length,top=qu.slice(0,3),st=DB.src||{},nf=(DB.inbox||[]).filter(n=>!n.o),first=(DB.name||"").split(" ")[0];
+ const tile=(a,b,c)=>`<button class="btn ghost sm" style="padding:12px 8px;display:flex;flex-direction:column;gap:6px;border-radius:14px;margin:0" data-a="edit" data-v="${a}"><span style="color:var(--mut)">${ic(b,24)}</span><span>${c}</span></button>`;
+ $("v").innerHTML=`<div class="hero">${mini(64)}<div><h1 style="margin:0;font-size:1.7rem">Hey ${esc(first)}, <em>ready</em>?</h1><p class="sub" style="margin:2px 0 0">${qu.length?qu.length+" jobs are in orbit for you.":"Your queue is empty. Let's scan the galaxies."}</p></div></div>
 ${cfg("apify")?"":`<div class="glass"><h3>Setup needed</h3><p class="note">Add your Apify token in Settings so I can scan for jobs.</p><button class="btn sm" data-a="gear">Open Settings</button></div>`}
-${nf.length?`<div class="glass" data-a="nopen" data-v="${esc(nf[0].id)}" style="cursor:pointer"><h3>\u{1F4E1} Mission Control${nf.length>1?" ("+nf.length+" new)":""}</h3><b>${esc(nf[0].title)}</b><p class="note" style="margin:4px 0 0">${esc(nf[0].msg)}</p></div>`:""}
-<div class="tiles"><div class="tile"><b>${J.length}</b><small>Jobs found</small></div><div class="tile"><b>${q.length}</b><small>In orbit</small></div><div class="tile"><b>${ap.length}</b><small>Applied</small></div><div class="tile"><b>${J.filter(j=>j.st=="int").length}</b><small>Interviews</small></div></div>
+${nf.length?`<div class="glass" data-a="nopen" data-v="${esc(nf[0].id)}" style="cursor:pointer"><h3>Mission Control${nf.length>1?" ("+nf.length+" new)":""}</h3><b>${esc(nf[0].title)}</b><p class="note" style="margin:4px 0 0">${esc(nf[0].msg)}</p></div>`:""}
+<div class="tiles"><div class="tile"><b>${J.length}</b><small>Jobs found</small></div><div class="tile"><b>${qu.length}</b><small>In orbit</small></div><div class="tile"><b>${ap.length}</b><small>Applied</small></div><div class="tile"><b>${J.filter(j=>j.st=="int").length}</b><small>Interviews</small></div></div>
 <button class="btn" style="margin-top:0" data-a="tab" data-v="jobs">Open my galaxies \u{1F680}</button><button class="btn ghost" data-a="refresh">\u{1F504} Refresh and search for more jobs</button>
 <div class="glass" style="margin-top:16px"><h3>This week</h3><div class="row"><div class="ring big" style="--p:${Math.min(100,wk/DB.goal*100)}"><i>${wk}/${DB.goal}</i></div><p class="note" style="margin:0 0 0 14px;flex:1">${wk>=DB.goal?"Goal reached. Outstanding work, astronaut!":(DB.goal-wk)+" more applications to hit this week's goal."}</p></div></div>
 ${top.length?`<div class="glass"><h3>Top matches</h3>${top.map(j=>`<div class="mrow" data-a="open" data-v="${esc(j.u)}">${logo(j,1)}<div><b>${esc(j.t)}</b><span class="co">${esc(j.c)}</span></div>${j.sc!=null?`<span class="tag hot">${j.sc}</span>`:""}</div>`).join("")}</div>`:""}
 <div class="glass"><h3>Your flight plan</h3><div class="lab">Roles</div><div class="chips" style="margin:4px 0">${DB.roles.map(r=>`<span class="tag">${esc(r)}</span>`).join("")||"<span class='tag'>None yet</span>"}</div><div class="lab">Cities</div><div class="chips" style="margin:4px 0">${DB.locs.map(r=>`<span class="tag hot">${esc(r)}</span>`).join("")||"<span class='tag'>Anywhere</span>"}</div><div class="lab">Resume</div><span class="tag">${esc(DB.rname||"None")}</span>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">
-<button class="btn ghost sm" style="padding:12px 8px;display:flex;flex-direction:column;gap:6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,0.03);margin:0" data-a="edit" data-v="resume"><span style="color:var(--mut)">${ic("file",24)}</span><span>Resume</span></button>
-<button class="btn ghost sm" style="padding:12px 8px;display:flex;flex-direction:column;gap:6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,0.03);margin:0" data-a="edit" data-v="roles"><span style="color:var(--mut)">${ic("briefcase",24)}</span><span>Roles</span></button>
-<button class="btn ghost sm" style="padding:12px 8px;display:flex;flex-direction:column;gap:6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,0.03);margin:0" data-a="edit" data-v="where"><span style="color:var(--mut)">${ic("pin",24)}</span><span>Cities</span></button>
-</div></div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px">${tile("resume","file","Resume")}${tile("roles","briefcase","Roles")}${tile("where","pin","Cities")}</div></div>
 ${Object.keys(st).length?`<div class="glass"><h3>Last scan</h3>${Object.keys(st).map(k=>`<div class="row" style="padding:3px 0"><span>${esc(k)}</span><b>${st[k].ok} found${st[k].bad&&!st[k].ok?" \u00b7 unavailable":""}</b></div>`).join("")}</div>`:""}`
 }catch(e){$("v").innerHTML=`<h1>Home <em>glitch</em></h1><p class="sub">${esc(e.message)}</p><button class="btn" data-a="tab" data-v="jobs">Open jobs</button>`}}
 function jobsV(){const v=$("v");if(S.gal===null||S.gal===undefined)return galV();
- const q=queue(S.gal),gn=S.gal=="all"?"All galaxies":S.gal;
- if(!q.length){v.innerHTML=`<h1>Galaxy <em>clear</em>.</h1><p class="sub">${esc(S.note||"You have been through every job here.")}</p><button class="btn" data-a="gal" data-v="">\u2039 Back to galaxies</button><button class="btn ghost" data-a="refresh">\u{1F504} Search for more jobs</button>${S.hist.length?'<button class="btn ghost" data-a="back">Back to the last job</button>':""}`;return}
- const j=S.cur&&DB.jobs[S.cur]&&DB.jobs[S.cur].st=="new"&&q.some(x=>x.id==S.cur)?DB.jobs[S.cur]:q[0];S.cur=j.id;DB.cur=j.id;const a=ats(j);if(a){j.ats=a.tot;j.miss=a.miss}
+ const qu=queue(S.gal),gn=S.gal=="all"?"All galaxies":S.gal;
+ if(!qu.length){v.innerHTML=`<h1>Galaxy <em>clear</em>.</h1><p class="sub">${esc(S.note||"You have been through every job here.")}</p><button class="btn" data-a="gal" data-v="">\u2039 Back to galaxies</button><button class="btn ghost" data-a="refresh">\u{1F504} Search for more jobs</button>${S.hist.length?'<button class="btn ghost" data-a="back">Back to the last job</button>':""}`;return}
+ const j=S.cur&&DB.jobs[S.cur]&&DB.jobs[S.cur].st=="new"&&qu.some(x=>x.id==S.cur)?DB.jobs[S.cur]:qu[0];S.cur=j.id;DB.cur=j.id;const a=ats(j);if(a){j.ats=a.tot;j.miss=a.miss}
  const ag=ago(j.pa),tags=[j.l,j.e&&j.e+" exp",j.p,j.lv,ag,"via "+j.s].filter(Boolean).map(x=>`<span class="tag${x==ag&&/Today|1 day/.test(x)?" hot":""}">${esc(x)}</span>`).join("");
  const sents=(j.jd||"").split(/(?<=[.!?])\s+/).filter(x=>x.length>30&&/(you will|responsib|require|experience|manage|lead|own|drive|build)/i.test(x)).slice(0,4),bl=(j.b&&j.b.length?j.b:sents.slice(0,3)).map(x=>`<li>${esc(x)}</li>`).join(""),
- about=j.about||((j.jd||"").match(/about (?:us|the company|[^.:]{2,40})[:\s-]+([^.]{40,260}\.)/i)||[])[1]||"No company brief yet. Turn on the AI crew in Settings for one.",sc=j.sc!=null?j.sc:(a?a.tot:null);
- const showTut = !DB.swipeTrained;
- v.innerHTML=`${S.note?`<p class="note">${esc(S.note)}</p>`:""}<div class="row" style="margin:0 2px 10px;align-items:center;"><button class="btn ghost sm" style="width:auto;padding:6px 14px;border-radius:99px;margin:0;" data-a="gal" data-v="">\u2039 Galaxies</button><span class="gn" style="margin:0;font-size:.66rem">${esc(gn)} \u00b7 ${q.length}</span></div>
-<div class="card ${showTut ? 'tut-swipe' : ''}" id="cd">
-${showTut ? '<div class="tut-label">← Swipe left to skip | Swipe right to apply →</div>' : ''}
+ about=j.about||((j.jd||"").match(/about (?:us|the company|[^.:]{2,40})[:\s-]+([^.]{40,260}\.)/i)||[])[1]||"No company brief yet. Turn on the AI crew in Settings for one.",sc=j.sc!=null?j.sc:(a?a.tot:null),tut=!DB.swipeTrained;
+ v.innerHTML=`${S.note?`<p class="note">${esc(S.note)}</p>`:""}<div class="row" style="margin:0 2px 10px"><button class="btn ghost sm" style="width:auto;padding:6px 14px;border-radius:99px" data-a="gal" data-v="">\u2039 Galaxies</button><span class="gn" style="margin:0;font-size:.66rem">${esc(gn)} \u00b7 ${qu.length}</span></div>
+<div class="card${tut?" tut-swipe":""}" id="cd">${tut?'<div class="tut-label">\u2190 Swipe left to skip | Swipe right to apply \u2192</div>':""}
 <div class="hd">${logo(j)}<div><h2>${esc(j.t)}</h2><div class="co">${esc(j.c||"Company not stated")}</div></div>${sc!=null?`<div class="ring" style="--p:${sc}"><i>${sc}</i></div>`:""}</div>
 <div class="tags">${tags}</div><ul class="bl">${bl}</ul>
 <div class="acts"><button class="act" data-a="apply"><span>${ic("rocket",26)}</span><div><b>Read posting &amp; apply</b><small>Opens the full job post</small></div></button>
@@ -553,16 +482,9 @@ ${j.pu?`<button class="act a4" data-a="open" data-v="${esc(j.pu)}"><span>${ic("u
 <button class="btn ghost sm" style="margin-top:6px" data-a="tlr">\u2728 ${j.tl?"Re-tailor":"Tailor"} my resume for this job</button>${j.tl?'<p class="note" style="margin:8px 0 0">Tailored resume ready. It attaches when you tap Email directly.</p>':""}`:`<p class="note">Add your resume to see your ATS score.</p>`}</div>
 <div class="glass"><h3>About the company</h3><p style="margin:0">${esc(about)}</p></div>
 <div class="glass"><h3>Mission summary</h3><ul class="bl">${bl||"<li>No summary available.</li>"}</ul><button class="txt" data-a="jd">Show full description</button><p id="fj" class="note" style="display:none;white-space:pre-wrap">${esc(j.jd)}</p></div>
-<div class="glass"><h3>Referral crew</h3><div id="rf">${refBox(j)}</div></div>`;
- swipe($("cd"))}
-function swipe(el){let x0=0,dx=0,on=false;el.style.touchAction="pan-y";el.onpointerdown=e=>{if(e.target.closest("button,a,input"))return;on=true;x0=e.clientX;dx=0;
- if(el.classList.contains('tut-swipe')){
-     el.classList.remove('tut-swipe');
-     const tut = el.querySelector('.tut-label');
-     if(tut) tut.remove();
-     DB.swipeTrained=true;save();
- }
- try{el.setPointerCapture(e.pointerId)}catch(x){}el.style.transition="none"};
+<div class="glass"><h3>Referral crew</h3><div id="rf">${refBox(j)}</div></div>`;swipe($("cd"))}
+function swipe(el){let x0=0,dx=0,on=false;el.style.touchAction="pan-y";
+ el.onpointerdown=e=>{if(e.target.closest("button,a,input"))return;on=true;x0=e.clientX;dx=0;if(el.classList.contains("tut-swipe")){el.classList.remove("tut-swipe");const t=el.querySelector(".tut-label");if(t)t.remove();DB.swipeTrained=true;save()}try{el.setPointerCapture(e.pointerId)}catch(x){}el.style.transition="none"};
  el.onpointermove=e=>{if(!on)return;dx=e.clientX-x0;el.style.transform=`translateX(${dx}px) rotate(${dx/18}deg)`;el.dataset.s=dx>45?"apply":dx<-45?"skip":""};
  el.onpointerup=el.onpointercancel=()=>{if(!on)return;on=false;el.style.transition="transform .25s";if(dx>110){el.style.transform="translateX(120vw) rotate(25deg)";setTimeout(()=>ACT.apply(),220)}else if(dx<-110){el.style.transform="translateX(-120vw) rotate(-25deg)";setTimeout(()=>ACT.skip(),220)}else{el.style.transform="";el.dataset.s=""}}}
 function dashV(){const J=Object.values(DB.jobs),ap=J.filter(j=>["applied","int","offer","rej"].includes(j.st)),c=s=>J.filter(j=>j.st==s).length,wk=ap.filter(j=>dayAgo(j.ap||0)<7).length,rate=ap.length?Math.round((c("int")+c("offer")+c("rej"))/ap.length*100):0,fu=ap.filter(j=>j.st=="applied"&&dayAgo(j.ap||0)>=7);
@@ -578,97 +500,47 @@ ${fu.length?`<div class="glass"><h3>Follow up now (${fu.length})</h3>${fu.slice(
 ${[["Top companies","c"],["Top cities","l"],["Top sources","s"]].map(x=>`<h3 style="margin-top:12px">${x[0]}</h3><div class="mw">${cnt(x[1]).map(y=>`<span>${esc(y[0])} \u00b7 ${y[1]}</span>`).join("")||"<span class='m'>none yet</span>"}</div>`).join("")}
 <h3 style="margin-top:12px">Keywords to add to your resume</h3><div class="mw">${miss.map(x=>`<span class="m">${esc(x[0])} \u00b7 ${x[1]}</span>`).join("")||"<span>none yet</span>"}</div></div>
 <div class="glass"><h3>Applications (${ap.length})</h3>${ap.length?ap.sort((a,b)=>b.ap-a.ap).map(j=>`<div class="app">${logo(j,1)}<div><b>${esc(j.t)}</b><div class="co">${esc(j.c)} \u00b7 applied ${dayAgo(j.ap)}d ago</div></div><div class="x"><select data-a="st" data-v="${esc(j.id)}">${[["applied","Applied"],["int","Interview"],["offer","Offer"],["rej","Rejected"]].map(o=>`<option value="${o[0]}"${j.st==o[0]?" selected":""}>${o[1]}</option>`).join("")}</select><button class="btn sm" style="width:auto" data-a="open" data-v="${esc(j.u)}">Open job</button></div></div>`).join(""):'<p class="note">Applications you make will show up here.</p>'}<button class="btn ghost" data-a="copy">Copy my summary</button></div>`}
-function setV(){
-    const openIdxs = Array.from(document.querySelectorAll('details.sec')).map((d, i) => d.hasAttribute('open') ? i : -1).filter(i => i >= 0);
-    const p=prov(),ib=(DB.inbox||[]).slice(0,10),un=(DB.inbox||[]).filter(n=>!n.o).length,sec=(t,b,i)=>`<details class="sec"><summary>${ic(i,20)} <span>${t}</span></summary><div class="in">${b}</div></details>`;
-    const curV = parseFloat(VER);
-    const filteredLog = LOG.filter(l => parseFloat(l.v) <= curV);
-    
-    $("v").innerHTML=`<h1><em>Settings</em></h1><p class="sub">Everything in its own crew quarter.</p>
+const HELP={free:["No key needed. The free crew is shared, so it can be slow or busy.","If it is busy, emails and resume tailoring still work from your own resume.","Tap Test to see if it is reachable right now."],gemini:["Tap Open key page and sign in with Google.","Choose Create API key and copy it.","Paste it in the API key box. The endpoint and model are already filled.","Tap Test."],groq:["Tap Open key page and sign up (free).","Create an API key and copy it.","Paste it in the API key box. Endpoint and model are filled.","Tap Test."],or:["Tap Open key page, sign up and create a key.","Paste the key in the API key box.","The default model ends in :free, which costs nothing.","Tap Test."],mistral:["Tap Open key page and create an account.","Create an API key under API keys and copy it.","Paste it in the API key box.","Tap Test."],deepseek:["Tap Open key page and sign in.","Create an API key and copy it. It needs a small prepaid balance.","Paste it in the API key box.","Tap Test."],together:["Tap Open key page, sign up and create a key.","Paste it in the API key box.","Tap Test."],openai:["Tap Open key page and create a secret key.","Paste it in the API key box. Billing must be enabled on your OpenAI account.","Tap Test."],claude:["Tap Open key page and create an API key.","Paste it in the API key box. Billing must be enabled.","Tap Test."],custom:["Enter the full chat-completions URL of your own server. It must start with https.","Enter the model name exactly as your server lists it.","Add an API key only if your server needs one.","Tap Test."]};
+const aiHelp=p=>`<div class="lab">How to set up ${esc(p.n)}</div><ol class="note" style="margin:4px 0 0 18px;padding:0">${(HELP[p.id]||[]).map(x=>`<li style="margin:4px 0">${esc(x)}</li>`).join("")}</ol>${p.h?`<button class="btn ghost sm" style="margin-top:8px" data-a="open" data-v="https://${esc(p.h)}">Open key page</button>`:""}`;
+function setV(){const open=[...document.querySelectorAll("details.sec")].map((d,i)=>d.open?i:-1).filter(i=>i>=0),p=prov(),sec=(t,b,i)=>`<details class="sec"><summary>${ic(i,20)} <span>${t}</span></summary><div class="in">${b}</div></details>`,curV=parseFloat(VER),log=LOG.filter(l=>parseFloat(l.v)<=curV),tg=(id,on,fn,label)=>`<div class="row" style="margin-bottom:8px"><span>${label}</span><label class="toggle"><input type="checkbox" id="${id}" ${on?"checked":""} onchange="${fn}"><span class="slider"></span></label></div>`;
+ $("v").innerHTML=`<h1><em>Settings</em></h1><p class="sub">Everything in its own crew quarter.</p>
 ${sec("Profile and resume",`<input id="nm" value="${esc(DB.name)}" placeholder="Name"><input id="em" value="${esc(DB.email)}" placeholder="Email"><input id="ph" type="tel" value="${esc(DB.phone)}" placeholder="Mobile (optional)"><button class="btn ghost sm" style="margin-top:10px" data-a="edit" data-v="resume">Change resume (${esc(DB.rname||"none")})</button><button class="btn ghost sm" style="margin-top:8px" data-a="edit" data-v="roles">Roles and cities</button>`,"user")}
 ${sec("Job search (Apify)",`<input type="password" id="ak" value="${esc(cfg("apify"))}" placeholder="Apify API token"><p class="note" style="margin:8px 0">Get it free at console.apify.com, Settings, API and integrations.</p><select id="dp"><option value="quick"${DB.depth!="full"?" selected":""}>Quick scan (5 job galaxies)</option><option value="full"${DB.depth=="full"?" selected":""}>Full scan (all galaxies, slower)</option></select>`,"search")}
-${sec("AI crew",`<select id="lm">${PROV.map(x=>`<option value="${x.id}"${x.id==p.id?" selected":""}>${esc(x.n)}</option>`).join("")}</select><input id="au" value="${esc(cfg("aiurl")||p.u)}" placeholder="Endpoint URL"><input id="am" value="${esc(cfg("aimodel")||p.m)}" placeholder="Model">${p.k?`<input type="password" id="ik" value="${esc(cfg("aikey"))}" placeholder="API key">`:""}${aiHelp(p)}<div class="row" style="gap:8px;margin-top:10px"><button class="btn ghost sm" data-a="aifill" style="flex:1">Auto-fill fields</button><button class="btn sm" data-a="aitest" style="flex:1">Test</button></div>`,"cpu")}
-${sec("App Preferences", `
-<div class="row" style="margin-top:0;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px">
-  <span>Theme</span>
-  <div class="theme-toggle">
-    <button data-a="theme" data-v="night" class="${DB.theme==='night'?'active':''}">${ic("moon",18)}</button>
-    <button data-a="theme" data-v="auto" class="${DB.theme==='auto'?'active':''}">${ic("auto",18)}</button>
-    <button data-a="theme" data-v="day" class="${DB.theme==='day'?'active':''}">${ic("sun",18)}</button>
-  </div>
-</div>
-<h3 style="margin-bottom:8px">Animations</h3>
-<div class="row" style="margin-bottom:8px"><span>Space Warp</span><label class="toggle"><input type="checkbox" id="warpToggle" ${DB.noWarpAnim ? "" : "checked"} onchange="DB.noWarpAnim=!this.checked;save()"><span class="slider"></span></label></div>
-<div class="row" style="margin-bottom:8px"><span>Galaxy Spin</span><label class="toggle"><input type="checkbox" id="galToggle" ${DB.noGalaxyAnim ? "" : "checked"} onchange="DB.noGalaxyAnim=!this.checked;save()"><span class="slider"></span></label></div>
-<div class="row" style="margin-bottom:8px"><span>Page Transitions</span><label class="toggle"><input type="checkbox" id="animToggle" ${DB.noAnim ? "" : "checked"} onchange="DB.noAnim=!this.checked;save()"><span class="slider"></span></label></div>
-<div class="row"><span>Dropdown Effects</span><label class="toggle"><input type="checkbox" id="dropToggle" ${DB.noDropdownAnim ? "" : "checked"} onchange="DB.noDropdownAnim=!this.checked;save()"><span class="slider"></span></label></div>
-`,"sparkles")}
-${sec("Mission Control messages"+(un?` (${un} new)`:""),(ib.length?ib.map(n=>`<div class="mrow" data-a="nopen" data-v="${esc(n.id)}"><div><b>${n.o?"":"\u25CF "}${esc(n.title)}</b><span class="co">${esc(n.msg)}</span></div></div>`).join(""):'<p class="note">No messages yet. HQ will ping you here.</p>')+'<div class="row" style="gap:8px;margin-top:10px"><button class="btn ghost sm" data-a="poll" style="flex:1">Check now</button><button class="btn ghost sm" data-a="ntest" style="flex:1">Test alert</button></div>',"message")}
+${sec("AI crew",`<select id="lm">${PROV.map(x=>`<option value="${x.id}"${x.id==p.id?" selected":""}>${esc(x.n)}</option>`).join("")}</select>${aiFields(p)}<p class="note" style="margin:8px 0">Status: ${DB.aiLast?(DB.aiLast=="OK"?"online":"offline, using built-in writing"):"not tested yet"}</p>${aiHelp(p)}<div class="row" style="gap:8px;margin-top:10px"><button class="btn ghost sm" data-a="aifill" style="flex:1">Auto-fill fields</button><button class="btn sm" data-a="aitest" style="flex:1">Test</button></div>`,"cpu")}
+${sec("App preferences",`<div class="row" style="border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:10px"><span>Theme</span><div class="theme-toggle"><button data-a="theme" data-v="night" class="${DB.theme==="night"?"active":""}">${ic("moon",18)}</button><button data-a="theme" data-v="auto" class="${DB.theme==="auto"?"active":""}">${ic("auto",18)}</button><button data-a="theme" data-v="day" class="${DB.theme==="day"?"active":""}">${ic("sun",18)}</button></div></div>
+<h3 style="margin-bottom:8px">Animations</h3>${tg("t1",!DB.noWarpAnim,"DB.noWarpAnim=!this.checked;save()","Space warp")}${tg("t2",!DB.noGalaxyAnim,"DB.noGalaxyAnim=!this.checked;save()","Galaxy spin")}${tg("t3",!DB.noAnim,"DB.noAnim=!this.checked;save()","Page transitions")}${tg("t4",!DB.noDropdownAnim,"DB.noDropdownAnim=!this.checked;save()","Dropdown effects")}
+<h3 style="margin:14px 0 8px">Referrals</h3>${tg("t5",DB.agencyContacts,"DB.agencyContacts=this.checked;save()","Show contacts for recruitment agencies")}<p class="note" style="margin:0">Off by default. When off, agency jobs only show the person who posted them.</p>`,"sparkles")}
 ${sec("Data and privacy",'<p class="note" style="margin:0">With your consent the app shares your name, email, mobile, phone model, searches and applications with the app owner. Your resume text and keys never leave this phone. Use Reset to wipe local data.</p>',"lock")}
-${sec("About and mission log",`<p style="margin:0 0 8px"><b>Escape Velocity - by RRK</b><br>Made by Raviraj Kumar</p><div class="row"><span>Launched</span><b>${LOG[LOG.length-1].d}</b></div><div class="row" style="margin-bottom:8px"><span>Last update</span><b>${LOG[0].d} (v${LOG[0].v})</b></div><button class="btn ghost sm" style="margin-bottom:12px" data-a="tour">Replay quick tour</button>${filteredLog.map(l=>`<div class="log"><b>v${l.v} - ${esc(l.n)}</b><small>${l.d}</small><ul>${l.t.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}`,"rocket")}
+${sec("About and mission log",`<p style="margin:0 0 8px"><b>Escape Velocity - by RRK</b><br>Made by Raviraj Kumar</p><div class="row"><span>Launched</span><b>${LOG[LOG.length-1].d}</b></div><div class="row" style="margin-bottom:8px"><span>Last update</span><b>${LOG[0].d} (v${LOG[0].v})</b></div><button class="btn ghost sm" style="margin-bottom:12px" data-a="tour">Replay quick tour</button>${log.map(l=>`<div class="log"><b>v${l.v} - ${esc(l.n)}</b><small>${l.d}</small><ul>${l.t.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`).join("")}`,"rocket")}
 <button class="btn" data-a="sv">Save settings</button><button class="btn ghost" data-a="chk">Check for updates (v${esc(VER)})</button><button class="btn ghost" style="color:#ff6b8b" data-a="reset">Reset everything</button>`;
-    $("lm").onchange=e=>{const q=PROV.find(x=>x.id==e.target.value);cfg("llm",q.id);cfg("aiurl","");cfg("aimodel","");setV()};
-    
-    setTimeout(()=>{
-        document.querySelectorAll('details.sec').forEach((d, i)=>{
-            if(openIdxs.includes(i)) d.setAttribute('open','');
-            d.ontoggle = () => {
-                if (d.open && !DB.noDropdownAnim) {
-                    const inner = d.querySelector('.in');
-                    inner.style.animation = 'none';
-                    inner.offsetHeight; /* trigger reflow */
-                    inner.style.animation = 'slideDown 0.25s ease-out';
-                }
-            };
-        });
-    },0);
-}
+ $("lm").onchange=e=>{cfg("llm",e.target.value);cfg("aiurl","");cfg("aimodel","");setV()};
+ setTimeout(()=>document.querySelectorAll("details.sec").forEach((d,i)=>{if(open.includes(i))d.setAttribute("open","");d.ontoggle=()=>{if(d.open&&!DB.noDropdownAnim){const n=d.querySelector(".in");n.style.animation="none";void n.offsetHeight;n.style.animation="slideDown .25s ease-out"}}}),0)}
+
+// ---------- actions ----------
 const cur=()=>DB.jobs[S.cur];
 function mark(st){const j=cur();if(!j)return;S.hist.push({id:j.id,p:j.st});j.st=st;if(st=="applied")j.ap=Date.now();S.note="";S.cur=null;DB.cur="";save();track(st,(j.c||"")+" | "+j.t);if(st=="applied")appSync(j);userSync(false);render();scrollTo(0,0)}
+const goGal=v=>{S.gal=v||null;S.cur=null;S.v="jobs";S.edit=false;render();scrollTo(0,0)};
 const ACT={
 tour(){slides(0)},
-fill(){},
-gal(v, el) {
-    if (v) {
-        if (el && el.classList.contains('gx')) {
-            if (!DB.noWarpAnim) {
-                const warp = new WarpEffect();
-                warp.start(() => {
-                    S.gal = v; S.cur = null; S.v = "jobs"; S.edit = false; render(); scrollTo(0, 0);
-                });
-            } else {
-                S.gal = v; S.cur = null; S.v = "jobs"; S.edit = false; render(); scrollTo(0, 0);
-            }
-        } else {
-            S.gal = v; S.cur = null; S.v = "jobs"; S.edit = false; render(); scrollTo(0, 0);
-        }
-    } else {
-        if (!DB.noWarpAnim) {
-            const warp = new WarpEffect();
-            warp.start(() => {
-                S.gal = null; S.cur = null; S.v = "jobs"; S.edit = false; render(); scrollTo(0, 0);
-            });
-        } else {
-            S.gal = null; S.cur = null; S.v = "jobs"; S.edit = false; render(); scrollTo(0, 0);
-        }
-    }
-},
-nopen(v){nopen(v)},
+gal(v){warp(()=>goGal(v))},
+bell(){bellPanel()},nopen(v){nopen(v)},
 aifill(){cfg("aiurl","");cfg("aimodel","");setV();toast("Endpoint and model reset to this provider's defaults")},
 async poll(){toast("Checking Mission Control...");if(NATIVE&&Android.pollNow)Android.pollNow();await notifSync();toast((DB.inbox||[]).length+" messages in your inbox")},
 ntest(){if(NATIVE&&Android.testNotif){Android.testNotif();toast("Test sent. Check your notification bar. If nothing shows, allow notifications for this app in Android settings.")}else toast("Test alerts work inside the app")},
 async aitest(){const p=prov(),t0=Date.now(),o=document.createElement("div");o.className="mod";o.innerHTML='<div class="glass"><h2>Testing...</h2><p class="note" style="margin-top:8px">Contacting '+esc(p.n)+'</p></div>';document.body.appendChild(o);let res;
- try{const r=await ai('Return {"ok":"yes"}',"ping",true);res=["It works","Replied in "+((Date.now()-t0)/1000).toFixed(1)+"s: "+JSON.stringify(r).slice(0,80)];S.aiDown=0;S.aiFails=0}catch(e){res=["Not working right now","Details: "+e.message+"\n\nWhat to try: "+(p.k?"check that the key, endpoint and model match the steps above.":"the free crew may be busy. Emails and tailoring still work without it. Try again later, or pick a provider with a free key.")]}
- o.innerHTML=`<div class="glass"><h2>${res[0]}</h2><p class="note" style="margin:8px 0 0;white-space:pre-wrap">${esc(res[1])}</p><button class="btn sm" id="ok2" style="margin-top:14px">Close</button></div>`;$("ok2").onclick=()=>o.remove()},
-async refs(v){const j=cur(),box=$("rf");if(v=="force")j.rf=1;box.innerHTML='<p class="note">Scanning the company crew...</p>';try{j.pool=rank(await fetchPeople(j),j);j.rs=3;save();track("referral",j.c)}catch(e){j.pool=[]}box.innerHTML=refBox(j)},
-async more(){const j=cur(),box=$("rf");if((j.rs||3)<j.pool.length){j.rs=(j.rs||3)+3;save();box.innerHTML=refBox(j);return}box.innerHTML='<p class="note">Searching wider...</p>';try{const m=await fetchPeople(j,true),have=new Set(j.pool.map(x=>x.u));j.pool=j.pool.concat(rank(m.filter(x=>!have.has(x.u)),j));j.rs=(j.rs||3)+3;save()}catch(e){}box.innerHTML=refBox(j)},
-async tlr(){const j=cur(),o=document.createElement("div");o.className="mod";o.innerHTML='<div class="glass"><h2>Tailoring...</h2><p class="note" style="margin-top:8px">Weaving the missing keywords into your existing wins.</p></div>';document.body.appendChild(o);
- try{const ch=await tailor(j);if(!ch.length)throw new Error("no safe spots found to add keywords");const b64=await makeDocx(applyChanges(normResume(DB.rt),ch)),name=(DB.name||"Resume").replace(/\s+/g,"_")+"_Resume_"+(j.c||"job").replace(/[^A-Za-z0-9]+/g,"_")+".docx";j.tl={name,b64};save();
-  o.innerHTML=`<div class="glass"><h2>Your tailored resume</h2><p class="note" style="margin:6px 0 0">${ch[0].basic?"Basic mode (AI offline). Please review every line.":"Rewritten in Google XYZ format. Check that every line is true."}</p><div class="mbox">${ch.map(c=>`<div class="chg"><s>${esc(c.old)}</s><em>${esc(c.new)}</em></div>`).join("")}</div><div class="row" style="gap:10px;margin-top:14px"><button class="btn ghost sm" id="t1" style="flex:1">Share / save</button><button class="btn sm" id="t2" style="flex:1">Email with it</button></div><button class="txt" id="t3" style="width:100%;margin-top:8px">Close</button></div>`;
-  $("t1").onclick=()=>{NATIVE&&Android.shareFile?Android.shareFile(name,b64):toast("Sharing works inside the app")};$("t2").onclick=()=>{o.remove();ACT.mail()};$("t3").onclick=()=>{o.remove();render()}}
- catch(e){o.remove();toast("Could not tailor: "+e.message)}},
+ try{const r=await ai('Return {"ok":"yes"}',"ping",true);res=["It works","Replied in "+((Date.now()-t0)/1000).toFixed(1)+"s: "+JSON.stringify(r).slice(0,80)]}catch(e){res=["Not working right now","Details: "+e.message+"\n\nWhat to try: "+(p.k?"check that the key, endpoint and model match the steps above.":"the free crew may be busy. Emails and tailoring still work without it. Try again later, or pick a provider with a free key.")]}
+ o.innerHTML=`<div class="glass"><h2>${res[0]}</h2><p class="note" style="margin:8px 0 0;white-space:pre-wrap">${esc(res[1])}</p><button class="btn sm" id="ok2" style="margin-top:14px">Close</button></div>`;$("ok2").onclick=()=>{o.remove();if(S.v=="set")setV()}},
+async refs(){const j=cur(),box=$("rf");box.innerHTML='<p class="note">Scanning the company crew...</p>';try{j.pool=rank(await fetchPeople(j),j);j.rs=3;save();track("referral",j.c)}catch(e){j.pool=[]}box.innerHTML=refBox(j)},
+async more(){const j=cur(),box=$("rf");if((j.rs||3)<j.pool.length){j.rs=(j.rs||3)+3;save();box.innerHTML=refBox(j);return}box.innerHTML='<p class="note">Searching wider...</p>';try{const m=await fetchPeople(j,true),have=new Set(j.pool.map(x=>x.u));j.pool=j.pool.concat(rank(m.filter(x=>!have.has(x.u)),j)).sort((a,b)=>(b.s||0)-(a.s||0));j.rs=(j.rs||3)+3;save()}catch(e){}box.innerHTML=refBox(j)},
+async tlr(){const j=cur(),o=document.createElement("div");o.className="mod";o.innerHTML='<div class="glass"><h2>Tailoring...</h2><p class="note" style="margin-top:8px">Weaving the missing keywords into your real achievements.</p></div>';document.body.appendChild(o);
+ try{const {ch,mode}=await tailor(j);if(!ch.length)throw new Error("no real achievement lines to improve in this resume");const out=await buildResume(ch,j);j.tl=out.primary;save();
+  const fmt=out.kept?"Your original Word layout is kept exactly. Only the lines below changed.":(out.pdf?"Your resume text is rebuilt as Word and PDF copies (the PDF layout is simplified).":"Your resume text is rebuilt as a Word copy.");
+  o.innerHTML=`<div class="glass"><h2>Your tailored resume</h2><p class="note" style="margin:6px 0 0">${mode=="AI"?"Rewritten in Google XYZ format by the AI crew. ":"Basic mode: the AI crew was busy, so keywords were added to real achievements. "}${fmt} Check every line is true.</p><div class="mbox">${ch.map(c=>`<div class="chg"><s>${esc(c.old)}</s><em>${esc(c.new)}</em></div>`).join("")}</div>
+  <div class="row" style="gap:10px;margin-top:14px"><button class="btn ghost sm" id="t1" style="flex:1">Share / save</button><button class="btn sm" id="t2" style="flex:1">Email with it</button></div>${out.docx&&out.pdf?'<button class="txt" id="t4" style="width:100%;margin-top:6px">Share the other format</button>':""}<button class="txt" id="t3" style="width:100%;margin-top:6px">Close</button></div>`;
+  const share=f=>NATIVE&&Android.shareFile?Android.shareFile(f.name,f.b64):toast("Sharing works inside the app");$("t1").onclick=()=>share(out.primary);$("t2").onclick=()=>{o.remove();ACT.mail()};$("t3").onclick=()=>{o.remove();render()};if($("t4"))$("t4").onclick=()=>share(out.primary===out.pdf?out.docx:out.pdf)}
+ catch(e){o.remove();say("Could not tailor",e.message)}},
 gear(){S.prev=S.v;S.v="set";render()},
-keynext(){cfg("apify",$("ak").value.trim());cfg("aiurl",$("au").value.trim());cfg("aimodel",$("am").value.trim());if($("ik"))cfg("aikey",$("ik").value.trim());S.v="ready";render()},
+keynext(){cfg("apify",$("ak").value.trim());saveAI();S.v="ready";render()},
 reset(){ask("Reset everything?","This wipes your profile, jobs, keys and settings from this phone and starts from the beginning. Data already shared with mission control stays there.","Yes, reset","Cancel",()=>{track("reset","");setTimeout(()=>{try{localStorage.clear()}catch(e){}if(NATIVE&&Android.clearResume)Android.clearResume();location.reload()},500)})},
 tab(v){S.v=v;S.edit=false;render();scrollTo(0,0)},edit(v){S.edit=true;S.v=v;render()},
 wel(){const n=$("nm").value.trim(),m=$("em").value.trim();if(!n||!/^\S+@\S+\.\S+$/.test(m)){$("er").textContent="Please enter your name and a valid email.";return}if(!$("cs").checked){$("er").textContent="Please tick the box to continue.";return}DB.name=n;DB.email=m;DB.phone=$("ph").value.trim();DB.consent=true;save();track("signup","");userSync(true);S.v=DB.rname?"home":"resume";render();if(!DB.tourAsk){DB.tourAsk=1;save();setTimeout(()=>ask("Quick tour?","Want a 30-second look at how everything works? You can skip it.","Show me","Skip",()=>slides(0)),500)}},
@@ -681,125 +553,24 @@ async refresh(){S.v="jobs";S.hist=[];S.gal=null;try{await search()}catch(e){S.no
 apply(){const j=cur();if(!j)return;fx("rocket",()=>{S.pend=j.id;DB.pend=j.id;save();openU(j.u);render()})},
 skip(){mark("skip")},done(){fx("tick",()=>mark("applied"))},
 back(){const h=S.hist.pop();if(!h)return;const j=DB.jobs[h.id];if(j){j.st=h.p;if(h.p=="new")delete j.ap}S.cur=h.id;save();S.v="jobs";render();scrollTo(0,0)},
-async mail(){const j=cur(),b=$("em");b.classList.add("busy");let d;try{d=await draft(j)}catch(e){d=tpl(j);S.by="Basic template"}b.classList.remove("busy");track("email_draft",(j.c||"")+" | "+j.t);toast("Email drafted by "+S.by+(j.tl?" with your tailored resume":""));S.aierr="";fx("mail",()=>sendMail(j,d))},
+async mail(){const j=cur(),b=$("em");if(b)b.classList.add("busy");let d;try{d=await draft(j)}catch(e){d=tpl(j);S.by="Basic template"}if(b)b.classList.remove("busy");track("email_draft",(j.c||"")+" | "+j.t);toast("Email drafted by "+S.by+(j.tl?" with your tailored resume":""));fx("mail",()=>sendMail(j,d))},
 wa(){const j=cur();openU(`https://wa.me/91${j.ph}?text=${encodeURIComponent(`Hi, I saw the ${j.t} opening${j.c?" at "+j.c:""}. I am ${DB.name}. Is the role still open? Happy to share my resume.`)}`)},
 open(v){openU(v)},jd(){const e=$("fj");e.style.display=e.style.display=="none"?"block":"none"},
-msg(v){const j=cur(),m=`Hi ${v.split(" ")[0]}, I'm ${DB.name}. I saw the ${j.t} opening at ${j.c} and my background looks like a good fit. Could you refer me or point me to the right person? Happy to send my resume. Thank you!`;try{navigator.clipboard.writeText(m);alert("Message copied. Paste it in LinkedIn.")}catch(e){alert(m)}},
+msg(v){const j=cur(),m=`Hi ${v.split(" ")[0]}, I'm ${DB.name}. I saw the ${j.t} opening at ${j.c} and my background looks like a good fit. Could you refer me or point me to the right person? Happy to send my resume. Thank you!`;try{navigator.clipboard.writeText(m);toast("Intro copied. Paste it in LinkedIn.")}catch(e){say("Your intro",m)}},
 st(v,b){const j=DB.jobs[v];if(j){j.st=b.value;save();appSync(j);track("status",b.value+" | "+j.t);userSync(false);dashV()}},goal(v){DB.goal=Math.max(1,DB.goal+ +v);save();dashV()},
-copy(){const ap=Object.values(DB.jobs).filter(j=>["applied","int","offer","rej"].includes(j.st)),m=`My Escape Velocity summary: ${ap.length} applications, ${ap.filter(j=>j.st=="int").length} interviews, ${ap.filter(j=>j.st=="offer").length} offers.\n`+ap.map(j=>`- ${j.t} at ${j.c} (${j.st})`).join("\n");try{navigator.clipboard.writeText(m);alert("Summary copied.")}catch(e){alert(m)}},
-sv(){DB.name=$("nm").value.trim()||DB.name;DB.email=$("em").value.trim()||DB.email;DB.phone=$("ph")?$("ph").value.trim():DB.phone;DB.depth=$("dp").value;cfg("apify",$("ak").value.trim());cfg("aiurl",$("au").value.trim());cfg("aimodel",$("am").value.trim());if($("ik"))cfg("aikey",$("ik").value.trim());save();track("settings","llm="+(cfg("llm")||"free"));S.v="home";render();alert("Saved.")},
-chk(){chk(true)},upd(){if(!NATIVE){window.open(S.upd.u);return}const o=document.createElement("div");o.className="mod";o.id="um";o.innerHTML='<div class="glass"><h2>Updating to v'+esc(S.upd.v)+'</h2><p class="note" id="up" style="margin-top:8px">Starting...</p></div>';document.body.appendChild(o);Android.install(S.upd.u)},
-theme(v){DB.theme=v;save();applyTheme();setV()}
-};
-document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b&&b.tagName!="SELECT"&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset.v,b,e)});
+copy(){const ap=Object.values(DB.jobs).filter(j=>["applied","int","offer","rej"].includes(j.st)),m=`My Escape Velocity summary: ${ap.length} applications, ${ap.filter(j=>j.st=="int").length} interviews, ${ap.filter(j=>j.st=="offer").length} offers.\n`+ap.map(j=>`- ${j.t} at ${j.c} (${j.st})`).join("\n");try{navigator.clipboard.writeText(m);toast("Summary copied")}catch(e){say("My summary",m)}},
+sv(){DB.name=$("nm").value.trim()||DB.name;DB.email=$("em").value.trim()||DB.email;DB.phone=$("ph").value.trim();DB.depth=$("dp").value;cfg("apify",$("ak").value.trim());saveAI();save();track("settings","llm="+(cfg("llm")||"free"));S.v="home";render();toast("Settings saved")},
+chk(){chk(true)},
+upd(){if(!NATIVE){window.open(S.upd.u);return}const o=document.createElement("div");o.className="mod";o.id="um";o.innerHTML='<div class="glass"><h2>Updating to v'+esc(S.upd.v)+'</h2><p class="note" id="up" style="margin-top:8px">Starting...</p></div>';document.body.appendChild(o);Android.install(S.upd.u)},
+theme(v){DB.theme=v;save();applyTheme();setV()}};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b&&b.tagName!="SELECT"&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset.v,b)});
 document.addEventListener("change",e=>{const b=e.target;if(b.tagName=="SELECT"&&b.dataset.a&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset.v,b)});
-window.__back=()=>{if(S.load)return true;if(S.v=="set"&&S.prev&&!TABS.includes(S.prev)){S.v=S.prev;S.prev=null;render();return true}if(S.v=="keys"){S.v="where";render();return true}if(S.v=="ready"){S.v="keys";render();return true}if(S.edit){S.edit=false;S.v="home";render();return true}if(S.v=="roles"){S.v="resume";render();return true}if(S.v=="where"){S.v="roles";render();return true}if(S.v=="jobs"&&S.hist.length){ACT.back();return true}if(S.v!="home"&&TABS.includes(S.v)){S.v="home";render();return true}return false};
+window.__back=()=>{if($("bp")){$("bp").remove();return true}if(S.load)return true;if(S.v=="set"&&S.prev&&!TABS.includes(S.prev)){S.v=S.prev;S.prev=null;render();return true}if(S.v=="keys"){S.v="where";render();return true}if(S.v=="ready"){S.v="keys";render();return true}if(S.edit){S.edit=false;S.v="home";render();return true}if(S.v=="roles"){S.v="resume";render();return true}if(S.v=="where"){S.v="roles";render();return true}if(S.v=="jobs"&&S.hist.length){ACT.back();return true}if(S.v!="home"&&TABS.includes(S.v)){S.v="home";render();return true}return false};
+
+// ---------- updates ----------
 const newer=(a,b)=>{a=a.split(".").map(Number);b=b.split(".").map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return false};
 async function chk(manual){try{const r=JSON.parse(await req("https://api.github.com/repos/kumarrajravi/JobHunt_By_RRK/releases/latest","GET","",{Accept:"application/vnd.github+json"})),v=(r.tag_name||"").replace(/^v/i,""),a=(r.assets||[]).find(x=>x.name.endsWith(".apk"));
- if(a&&newer(v,VER)){S.upd={v,u:a.browser_download_url};render()}else if(manual)alert("You have the latest version (v"+VER+").")}catch(e){if(manual)alert("Could not check for updates: "+e.message)}}
-
-// --- NEW HYPERSPACE STARFIELD WARP ---
-class WarpEffect {
-    constructor() {
-        this.canvas = document.createElement('canvas');
-        this.ctx = this.canvas.getContext('2d');
-        this.canvas.style.position = 'fixed';
-        this.canvas.style.inset = '0';
-        this.canvas.style.zIndex = '9999';
-        this.canvas.style.pointerEvents = 'none';
-        this.canvas.style.background = DB.theme === 'day' ? '#f2f5f9' : '#04060d';
-        document.body.appendChild(this.canvas);
-        this.resize();
-        window.addEventListener('resize', () => this.resize());
-        this.stars = [];
-        this.numStars = 800;
-        this.speed = 0.05;
-        this.initialized = false;
-        this.raf = null;
-        this.initStars();
-    }
-
-    resize() {
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
-        this.cx = this.canvas.width / 2;
-        this.cy = this.canvas.height / 2;
-    }
-
-    initStars() {
-        for (let i = 0; i < this.numStars; i++) {
-            this.stars.push({
-                x: (Math.random() - 0.5) * 2000,
-                y: (Math.random() - 0.5) * 2000,
-                z: Math.random() * 2000,
-                pz: 0
-            });
-        }
-    }
-
-    start(callback) {
-        if (this.initialized) return;
-        this.initialized = true;
-        this.callback = callback;
-        this.startTime = performance.now();
-
-        const animate = (time) => {
-            const elapsed = time - this.startTime;
-            const accel = Math.min(elapsed / 500, 1);
-            const currentSpeed = 20 + accel * 120; // Warp speed
-
-            // Fade trail slightly (adjust for day theme)
-            this.ctx.fillStyle = DB.theme === 'day' ? 'rgba(242, 245, 249, 0.3)' : 'rgba(4, 6, 13, 0.3)';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-            this.stars.forEach(star => {
-                star.pz = star.z;
-                star.z -= currentSpeed * 0.016; // ~60fps
-
-                if (star.z <= 0) {
-                    star.z = 2000;
-                    star.x = (Math.random() - 0.5) * 2000;
-                    star.y = (Math.random() - 0.5) * 2000;
-                    star.pz = star.z;
-                }
-
-                const x = (star.x / star.z) * this.cx + this.cx;
-                const y = (star.y / star.z) * this.cy + this.cy;
-                const px = (star.x / star.pz) * this.cx + this.cx;
-                const py = (star.y / star.pz) * this.cy + this.cy;
-
-                const size = Math.max(0.2, (1 - star.z / 2000) * 3);
-
-                this.ctx.beginPath();
-                this.ctx.moveTo(px, py);
-                this.ctx.lineTo(x, y);
-                
-                // Star color adjust for day/night
-                if (DB.theme === 'day') {
-                    this.ctx.strokeStyle = `rgba(100, 100, 150, ${1 - star.z / 2000})`;
-                } else {
-                    this.ctx.strokeStyle = `rgba(255, 255, 255, ${1 - star.z / 2000})`;
-                }
-                
-                this.ctx.lineWidth = size;
-                this.ctx.stroke();
-            });
-
-            if (elapsed < 1200) { // 1.2 seconds
-                this.raf = requestAnimationFrame(animate);
-            } else {
-                this.canvas.style.transition = 'opacity 0.3s';
-                this.canvas.style.opacity = '0';
-                setTimeout(() => {
-                    this.canvas.remove();
-                    if (this.callback) this.callback();
-                }, 300);
-            }
-        };
-        this.raf = requestAnimationFrame(animate);
-    }
-}
-
+ if(a&&newer(v,VER)){S.upd={v,u:a.browser_download_url};render()}else if(manual)say("You are up to date","You are on the latest version of Escape Velocity (v"+VER+").")}catch(e){if(manual)say("Could not check for updates","Please check your connection and try again.\n\n"+e.message)}}
 splash();chk(false);
 </script>
 </body>
