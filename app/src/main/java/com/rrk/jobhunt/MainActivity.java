@@ -230,6 +230,27 @@ public class MainActivity extends Activity {
             });
         }
 
+        // Saves a file into the phone's Downloads folder (Android 10+), or opens the share sheet on older phones.
+        @JavascriptInterface
+        public void downloadFile(final String name, final String b64) {
+            try {
+                byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                if (Build.VERSION.SDK_INT >= 29) {
+                    android.content.ContentValues v = new android.content.ContentValues();
+                    v.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, name);
+                    v.put(android.provider.MediaStore.Downloads.MIME_TYPE, mime(name));
+                    v.put(android.provider.MediaStore.Downloads.RELATIVE_PATH, "Download/");
+                    Uri u = getContentResolver().insert(android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                    try (OutputStream o = getContentResolver().openOutputStream(u)) { o.write(data); }
+                    js("window.toast&&window.toast(" + JSONObject.quote("Saved to Downloads: " + name) + ")");
+                } else {
+                    shareFile(name, b64);
+                }
+            } catch (Exception e) {
+                js("window.toast&&window.toast(" + JSONObject.quote("Could not save the file: " + e) + ")");
+            }
+        }
+
         @JavascriptInterface
         public void shareFile(final String name, final String b64) {
             runOnUiThread(() -> {
